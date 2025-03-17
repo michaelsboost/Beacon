@@ -1,5 +1,14 @@
 # Beacon  
-Beacon is an offline survival utility for mobile devices, built with Alpine.js. It includes essential tools like an SOS signal, signal mirror, compass, pedometer, level tool, and notepad, designed for emergency situations and outdoor use.
+Beacon is an offline survival utility specifically designed for mobile devices (phones and tablets). Built with Alpine.js and Tailwind CSS, it provides essential survival tools such as:
+
+✅ SOS Signal (Audible distress signal)
+✅ Signal Mirror (Flashes SOS in Morse Code)
+✅ Compass (Device-based direction finder)
+✅ Pedometer (Step counter with distance tracking)
+✅ Level Tool (Helps gauge flat surfaces)
+✅ Notepad (Offline text storage for survival notes)
+
+Whether you're hiking, camping, or preparing for emergencies, Beacon functions completely offline to ensure reliability when it matters most.
 
 ### Version  
 0.0.1
