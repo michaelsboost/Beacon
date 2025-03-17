@@ -127,6 +127,7 @@
 
     <!-- Morse Code Translator -->
     <article class="tile col-span-2 md:col-span-2 row-span-2 h-48 flex flex-col justify-center items-center" x-data="{
+         playing: null,
          textInput: '',
          morseOutput: '',
          morseMap: {
@@ -143,18 +144,52 @@
              .join(' ');
          },
          playMorseCode() {
-           let pattern = this.morseOutput.replace(/-/g, '300')
-             .replace(/\./g, '100')
-             .replace(/ /g, '0')
-             .split('')
-             .map(n => parseInt(n));
-           navigator.vibrate(pattern);
-         }
+          if (this.playing) {
+            this.playing = false; // Stop current playback
+            clearTimeout(this.timeout); // Cancel the queue
+            navigator.vibrate(0); // Stop any ongoing vibration
+            return;
+          }
+        
+          this.playing = true; // Mark as playing
+        
+          let morseSequence = this.morseOutput.split('');
+          let index = 0;
+          let unit = 200; // Base timing unit (200ms for a dot)
+        
+          const playNext = () => {
+            if (!this.playing || index >= morseSequence.length) {
+              this.playing = false;
+              return;
+            }
+        
+            let symbol = morseSequence[index];
+            index++;
+        
+            switch (symbol) {
+              case '.':
+                navigator.vibrate(unit);
+                this.timeout = setTimeout(playNext, unit * 2);
+                break;
+              case '-':
+                navigator.vibrate(unit * 3);
+                this.timeout = setTimeout(playNext, unit * 4);
+                break;
+              case ' ':
+                this.timeout = setTimeout(playNext, unit * 6);
+                break;
+              default:
+                playNext();
+            }
+          };
+        
+          playNext();
+        }
        }">
       <span class="text-2xl mb-4">Morse Code</span>
       <fieldset role="group">
         <input x-model="textInput" @input="updateMorse()" type="text" placeholder="Enter text..." class="w-5/6 p-2 rounded-md">
-        <button @click="playMorseCode()">Play</button>
+        <button @click="playMorseCode()" x-text="playing ? 'Stop' : 'Play'">Play</button>
       </fieldset>
       <p x-text="morseOutput" class="text-lg mt-2"></p>
     </article>
@@ -186,19 +221,12 @@
     
       <p class="mt-4 text-sm">Tilt your device to see the bubble move.</p>
     </article>
-
-
-    <!-- Notepad -->
-    <article class="tile col-span-2 row-span-2 h-48 flex flex-col justify-center items-center" x-data="{ note: localStorage.getItem('note') || '' }" @input="localStorage.setItem('note', note)">
-      <span class="text-2xl mb-4">Notepad</span>
-      <textarea x-model="note" class="w-5/6 h-3/5 p-2 rounded-md"></textarea>
-    </article>
   </div>
 </main>
 
 <div id="signalMirror" class="fixed inset-0 bg-white hidden z-20"></div>
 
-    <script src="dist/script.js" type="module"></script>
+    <script src="dist/script.js" ></script>
     <script src="https://storage.googleapis.com/workbox-cdn/releases/6.4.1/workbox-sw.js"></script>
     <script>
       // service worker for progressive web app
