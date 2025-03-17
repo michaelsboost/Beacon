@@ -9,7 +9,7 @@ Beacon is built using modern web technologies:
 
 * [Alpine.js](https://alpinejs.dev/) - A minimal, declarative framework for JavaScript interactivity.
 * [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapid UI development.
-* [Pixabay Audio](https://iconify.design/docs/api/](https://pixabay.com/sound-effects/morse-sos-93449/) - Free sound effects for emergency signals/sounds.
+* [Pixabay Audio](https://iconify.design/docs/api/https://pixabay.com/sound-effects/morse-sos-93449/) - Free sound effects for emergency signals/sounds.
   
 ### License  
 MIT
