@@ -6,7 +6,6 @@ Beacon is an offline survival utility specifically designed for mobile devices (
 ✅ Compass (Device-based direction finder)  
 ✅ Pedometer (Step counter with distance tracking)  
 ✅ Level Tool (Helps gauge flat surfaces)  
-✅ Notepad (Offline text storage for survival notes)  
 
 Whether you're hiking, camping, or preparing for emergencies, Beacon functions completely offline to ensure reliability when it matters most.
 
