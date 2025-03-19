@@ -1,23 +1,46 @@
-// Service worker code
+// Import Workbox
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.4.1/workbox-sw.js');
 
 const { registerRoute } = workbox.routing;
-const { CacheFirst } = workbox.strategies;
+const { CacheFirst, NetworkFirst } = workbox.strategies;
+const { clientsClaim, skipWaiting } = workbox.core;
 
-const cacheName = 'Beacon-cache';
+const cacheName = 'Beacon-cache-v0.0.2';  // Change version number when you update
 
-workbox.routing.registerRoute(
-({ request }) => request.destination === 'script' ||
-           request.destination === 'style' ||
-           request.destination === 'document' ||
-           request.destination === 'image' ||
-           request.destination === 'font' ||
-           request.destination === 'audio' ||
-           request.destination === 'video',
-new CacheFirst({
-cacheName: cacheName,
-plugins: [
-// Any additional plugins can be added here
-],
-})
+// Activate new service worker immediately and claim clients
+self.addEventListener('install', (event) => {
+    self.skipWaiting(); // Forces new SW to take control immediately
+});
+
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cache => {
+                    if (cache !== cacheName) {
+                        console.log(`Deleting old cache: ${cache}`);
+                        return caches.delete(cache);
+                    }
+                })
+            );
+        })
+    );
+    clientsClaim(); // Forces all open clients to be controlled by new SW
+});
+
+// Cache strategy for assets
+registerRoute(
+    ({ request }) => ['script', 'style', 'document', 'image', 'font', 'audio', 'video'].includes(request.destination),
+    new CacheFirst({
+        cacheName: cacheName,
+    })
+);
+
+// Update checking for `version.json`
+registerRoute(
+    ({ url }) => url.pathname.endsWith('/version.json'),
+    new NetworkFirst({
+        cacheName: 'version-cache',
+        networkTimeoutSeconds: 3,
+    })
 );
