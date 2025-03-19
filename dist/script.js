@@ -1991,7 +1991,7 @@ document.addEventListener('alpine:init', () => {
     toggleCategory(category) {
       category.expanded = !category.expanded;
     }
-}));
+  }));
 
   // Survival Tools
   Alpine.data('survivalTools', () => ({
@@ -2219,7 +2219,7 @@ document.addEventListener('alpine:init', () => {
         bubbleX() { return `translateX(${this.x * 10}px)`; },
         bubbleY() { return `translateY(${this.y * 10}px)`; }
     }
-}));
+  }));
 
   // Guides
   Alpine.data("library", () => ({
