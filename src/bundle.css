@@ -1,25 +1,23 @@
-@import '../libraries/pico.min.css';
+/* For WebKit browsers (Chrome, Safari) */
 
-  
+/* ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3b82f6;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2464cc;
+} */
+
+ul p, ul strong {
+  display: unset;
+  margin: 0; padding: 0;
+}
+  @tailwind base;
 @tailwind components;
 @tailwind utilities;
-.tile {
-  @apply flex flex-col items-center justify-center rounded-lg shadow-lg hover:scale-105 transition-transform duration-300 text-white text-xl font-bold p-4;
-}
-.dashboard-container {
-  scroll-behavior: smooth;
-}
-.toggle-checkbox {
-  width: 40px;
-  height: 20px;
-  appearance: none;
-  background: #4B5563;
-  border-radius: 10px;
-  position: relative;
-  cursor: pointer;
-  outline: none;
-  transition: background 0.3s;
-}
-.toggle-checkbox:checked {
-  background: #10B981;
-}

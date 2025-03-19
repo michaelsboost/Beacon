@@ -6,7 +6,7 @@
   "lang": "en-US",
   "name": "Beacon",
   "short_name": "Beacon",
-  "description": "Beacon: A minimalist emergency survival tool designed for quick access to essential features like an SOS signal, compass, pedometer, Morse code translator, and a functional signal mirror. Built for reliability and efficiency, this tool ensures users have life-saving utilities available offline when they need them most.",
+  "description": "Beacon combines emergency survival tools with skill-building and resource management. Quickly access life-saving features like an SOS signal, compass, pedometer, Morse code translator, and signal mirror, while also tracking your survival training, managing resources, and completing essential checklists. Whether you're in an emergency or sharpening your survival knowledge, Beacon keeps you prepared.",
   "icons": [
     {
       "src": "./imgs/logo-192x192.png",

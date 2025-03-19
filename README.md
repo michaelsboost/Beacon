@@ -1,47 +1,122 @@
-# Beacon  
-Beacon is an offline survival utility specifically designed for mobile devices (phones and tablets). Built with Alpine.js and Tailwind CSS, it provides essential survival tools such as:
+# 📖 Beacon Survival App
 
-✅ SOS Signal (Audible distress signal)  
-✅ Signal Mirror (Flashes SOS in Morse Code)  
-✅ Compass (Device-based direction finder)  
-✅ Pedometer (Step counter with distance tracking)  
-✅ Level Tool (Helps gauge flat surfaces)  
+## 🌟 Overview
+The **Beacon Survival App** is an **interactive survival training tool** designed to help users build critical survival skills through **guides, training simulations, emergency checklists, and scenario-based challenges**. It includes **real-time progress tracking, skill meters, local storage integration, and an interactive UI** powered by **Alpine.js**.
 
-Whether you're hiking, camping, or preparing for emergencies, Beacon functions completely offline to ensure reliability when it matters most.
+> 🛠️ **Built Entirely with kodeWeave**  
+> This app was developed using **[kodeWeave](https://michaelsboost.com/kodeweave)**, a powerful coding playground that allows developers to write, test, and refine web applications from anywhere.
 
-### Version  
-0.0.1
+### ⚠️ **Project Status**
+> **As of March 19, 2025, this project has been abandoned.**  
+> **All further updates and contributions are now community-driven.**  
+> **The original developer, Michael Schwartz, is no longer maintaining or updating this repository.**  
 
-### Tech  
-Beacon is built using modern web technologies:
+If you wish to contribute, feel free to **fork the project** and expand upon it.
 
-* [Alpine.js](https://alpinejs.dev/) - A minimal, declarative framework for JavaScript interactivity.
-* [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapid UI development.
-* [Pixabay Audio](https://iconify.design/docs/api/https://pixabay.com/sound-effects/morse-sos-93449/) - Free sound effects for emergency signals/sounds.
-  
-### License  
-MIT
+---
 
-### Author
+## 🚀 **Launch the App**
+🌍 **Beacon Survival App is live!**  
+Access it here: **[Beacon Survival App](https://michaelsboost.com/Beacon/)**
 
-- [michael schwartz](https://michaelsboost.github.io/)
+> 📲 **Progressive Web App (PWA) Support**  
+> Beacon can be **installed as a PWA**, allowing you to use it **offline** and access features seamlessly across devices.
 
-### Development
+---
 
-Want to contribute? Great!  
+## 🛠️ Key Features
 
-You can submit a pull request or simply share the project :)  
+### 🎓 **Training System**
+- Tracks **skill points** across multiple training areas.
+- Users complete **challenges** to gain experience and level up.
+- Global progress meters determine overall **survival readiness**.
+- Supports **real-time updates & persistent state saving** with LocalStorage.  
 
-Of course Beacon is free and open source, so you can always fork the project and have fun :)  
+### 🌍 **Resource Management Survival Game**
+- **Manage essential survival resources** such as:
+  - **🥩 Food**
+  - **💧 Water**
+  - **⚡ Energy**
+  - **❤️ Health**
+  - **🔥 Temperature**
+- **Day/Night cycle & seasonal weather effects**.
+- **Hunger & thirst mechanics** that require careful resource planning.
+- **Injury & sickness simulation**, requiring medicine and rest to survive.
+- **Exploration, hunting, foraging, and crafting mechanics** to gather new resources.
+- **Dynamic event log** to track in-game survival status.
 
-[![ko-fi](https://az743702.vo.msecnd.net/cdn/kofi2.png?v=0)](https://ko-fi.com/michaelsboost)  
+### 🎭 **Survival Scenario Simulator**
+- Interactive scenarios with **dynamic challenges**.
+- **Time-based survival mechanics** (e.g., complete objectives before time runs out).
+- **Only one active scenario runs at a time**.
+- Supports **starting, pausing, and completing challenges** dynamically.
 
-If Polyrise was at all helpful for you. You can show your appreciation a few ways...  
+### 🆘 **Emergency Preparedness Checklist**
+- Covers **shelter, food, finances, transportation, and personal security**.
+- Readiness level indicators from **Unprepared 🚨 to Ultimate Survivalist 🏆**.
+- **LocalStorage integration** saves checklist states across sessions.
 
-1) Check out my Graphic Design Course: https://michaelsboost.com/graphicdesign  
-2) Registering on my store as a customer: https://michaelsboost.com/store  
-3) Buying me a coffee! http://ko-fi.com/michaelsboost  
-4) Purchasing one of my t-shirts: https://michaelsboost.com/gear  
-5) Purchasing any of my art: https://deviantart.com/michaelsboost/prints  
-6) Donating via PayPal: https://michaelsboost.com/donate  
-7) Donating via Cash App: https://cash.me/$michaelsboost  
+### **🛠️ Survival Tools**
+Enhance your survival experience with built-in survival tools, including:  
+
+- **Signal Mirror** – Flashes an SOS light pattern to simulate emergency signaling.
+- **Compass** – Uses device orientation to provide a real-time directional heading.
+- **Pedometer** – Tracks step count using motion sensors.
+- **Morse Code Translator** – Converts text into Morse code and plays it via vibrations.
+- **Level Tool** – Uses accelerometer data to determine balance and leveling.
+
+### ✅ **Survival Guides Library**
+- Organized by **categories** (e.g., Fire-Making, Shelter, Water Collection, Foraging, Tactical, etc.).
+- Each guide includes **step-by-step instructions, required materials, and tips**.
+- **Readiness meters** track completion levels for individual guides and overall preparedness.
+- **Markdown rendering** converts guides into a structured HTML format.
+
+### 🔄 **LocalStorage Integration**
+- **Saves key user progress** (guides, checklist, training progress) across sessions.
+- Uses **individual keys** for optimized storage (`emergencyCategories`, `trainingProgress`, `libraryGuides`, etc.).
+- Ensures efficient data retrieval and updates without unnecessary UI re-rendering.
+
+---
+
+## ⚡ **Getting Started**
+### **1️⃣ Install & Run Locally**
+```sh
+# Clone the repository
+git clone https://github.com/michaelsboost/Beacon.git
+cd Beacon
+
+# Open index.html in a browser
+```
+
+### **2️⃣ Dependencies**
+- Alpine.js (lightweight reactive framework)
+- TailwindCSS (for UI styling)
+- Marked.js (for Markdown rendering)
+
+### **3️⃣ Contributing**
+Since the project is now community-driven:
+- Fork the repo
+- Create a feature branch (`feature-new-skill-system`)
+- Submit a pull request 🎉
+- Community members may review, merge, or modify updates as needed.
+
+---
+
+## 📜 **License**
+This project is licensed under the **MIT License**. You are free to use, modify, and distribute it.
+
+**Originally Developed by:** [Michael Schwartz](https://michaelsboost.com/)  
+**Maintained by:** The Community (as of March 19, 2025)
+
+## **☕ Support the Developer**
+If Beacon was helpful for you, consider showing your appreciation in the following ways:
+
+- 🎨 Check out my Graphic Design Course: https://michaelsboost.com/graphicdesign  
+- 🛒 Register as a customer on my store: https://michaelsboost.com/store  
+- ☕ Buy me a coffee: http://ko-fi.com/michaelsboost  
+- 👕 Purchase a T-Shirt: https://michaelsboost.com/gear  
+- 🖼️ Buy my art prints: https://deviantart.com/michaelsboost/prints 
+- 💰 Donate via PayPal: https://michaelsboost.com/donate 
+- 💵 Donate via Cash App: https://cash.me/$michaelsboost  
+
+Your support is greatly appreciated and helps fund future projects! 🚀
