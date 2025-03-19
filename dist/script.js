@@ -1995,87 +1995,89 @@ document.addEventListener('alpine:init', () => {
 
   // Survival Tools
   Alpine.data('survivalTools', () => ({
-    currentVersion: "0.0.3",  // Update this every time you release a new version
-    latestVersion: null,
-    updateAvailable: false,
-
-    init() {
-        this.checkForUpdate();
-    },
-
-    async checkForUpdate() {
-        try {
-            let response = await fetch('/version.json', { cache: 'no-cache' });
-            let data = await response.json();
-            this.latestVersion = data.version;
-
-            if (this.latestVersion !== this.currentVersion) {
-                this.updateAvailable = true;
-            }
-        } catch (error) {
-            console.warn("Could not check for updates:", error);
-        }
-    },
-
-    updatePWA() {
-        if (navigator.serviceWorker) {
-            navigator.serviceWorker.getRegistrations().then(registrations => {
-                for (let registration of registrations) {
-                    registration.unregister();
-                }
-            });
-        }
-
-        caches.keys().then(cacheNames => {
-            cacheNames.forEach(cacheName => caches.delete(cacheName));
-        });
-
-        setTimeout(() => {
-            location.reload();
-        }, 1000);
-    },
-    
-    // Import/Export Data
-    exportAppData() {
-        const appData = {
-            emergencyCategories: JSON.parse(localStorage.getItem("emergencyCategories") || "[]"),
-            guides: JSON.parse(localStorage.getItem("guides") || "[]"),
-            skillPoints: JSON.parse(localStorage.getItem("skillPoints") || "0"),
-            skills: JSON.parse(localStorage.getItem("skills") || "[]")
-        };
-    
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
-        const downloadAnchor = document.createElement("a");
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", "BeaconAppData.json");
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        document.body.removeChild(downloadAnchor);
-    },
-    importAppData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-    
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            try {
-                const appData = JSON.parse(event.target.result);
-                
-                if (appData) {
-                    localStorage.setItem("emergencyCategories", JSON.stringify(appData.emergencyCategories || []));
-                    localStorage.setItem("guides", JSON.stringify(appData.guides || []));
-                    localStorage.setItem("skillPoints", JSON.stringify(appData.skillPoints || 0));
-                    localStorage.setItem("skills", JSON.stringify(appData.skills || []));
-    
-                    alert("Data imported successfully! Refreshing the page...");
-                    location.reload(); // Refresh the page to apply changes
-                }
-            } catch (error) {
-                alert("Invalid JSON file. Please upload a valid BeaconAppData.json file.");
-            }
-        };
-        
-        reader.readAsText(file);
+    status: {
+      currentVersion: "0.0.4",  // Update this every time you release a new version
+      latestVersion: null,
+      updateAvailable: false,
+  
+      init() {
+          this.checkForUpdate();
+      },
+  
+      async checkForUpdate() {
+          try {
+              let response = await fetch('/version.json', { cache: 'no-cache' });
+              let data = await response.json();
+              this.latestVersion = data.version;
+  
+              if (this.latestVersion !== this.currentVersion) {
+                  this.updateAvailable = true;
+              }
+          } catch (error) {
+              console.warn("Could not check for updates:", error);
+          }
+      },
+  
+      updatePWA() {
+          if (navigator.serviceWorker) {
+              navigator.serviceWorker.getRegistrations().then(registrations => {
+                  for (let registration of registrations) {
+                      registration.unregister();
+                  }
+              });
+          }
+  
+          caches.keys().then(cacheNames => {
+              cacheNames.forEach(cacheName => caches.delete(cacheName));
+          });
+  
+          setTimeout(() => {
+              location.reload();
+          }, 1000);
+      },
+      
+      // Import/Export Data
+      exportAppData() {
+          const appData = {
+              emergencyCategories: JSON.parse(localStorage.getItem("emergencyCategories") || "[]"),
+              guides: JSON.parse(localStorage.getItem("guides") || "[]"),
+              skillPoints: JSON.parse(localStorage.getItem("skillPoints") || "0"),
+              skills: JSON.parse(localStorage.getItem("skills") || "[]")
+          };
+      
+          const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+          const downloadAnchor = document.createElement("a");
+          downloadAnchor.setAttribute("href", dataStr);
+          downloadAnchor.setAttribute("download", "BeaconAppData.json");
+          document.body.appendChild(downloadAnchor);
+          downloadAnchor.click();
+          document.body.removeChild(downloadAnchor);
+      },
+      importAppData(event) {
+          const file = event.target.files[0];
+          if (!file) return;
+      
+          const reader = new FileReader();
+          reader.onload = function(event) {
+              try {
+                  const appData = JSON.parse(event.target.result);
+                  
+                  if (appData) {
+                      localStorage.setItem("emergencyCategories", JSON.stringify(appData.emergencyCategories || []));
+                      localStorage.setItem("guides", JSON.stringify(appData.guides || []));
+                      localStorage.setItem("skillPoints", JSON.stringify(appData.skillPoints || 0));
+                      localStorage.setItem("skills", JSON.stringify(appData.skills || []));
+      
+                      alert("Data imported successfully! Refreshing the page...");
+                      location.reload(); // Refresh the page to apply changes
+                  }
+              } catch (error) {
+                  alert("Invalid JSON file. Please upload a valid BeaconAppData.json file.");
+              }
+          };
+          
+          reader.readAsText(file);
+      },
     },
       
     // 📡 Signal Mirror
@@ -2112,16 +2114,22 @@ document.addEventListener('alpine:init', () => {
 
     // 🧭 Compass
     compass: {
-        heading: 0,
-        init() {
-            if ('ondeviceorientationabsolute' in window) {
-                window.addEventListener('deviceorientationabsolute', (event) => {
-                    this.heading = Math.round(event.alpha);
-                    this.$refs.compassArrow.style.transform = `rotate(${360 - this.heading}deg)`;
-                });
-            } else {
-                this.heading = 'Not Supported';
-            }
+        heading: 0
+    },
+
+    initCompass() {
+        if ('ondeviceorientationabsolute' in window) {
+            window.addEventListener('deviceorientationabsolute', (event) => {
+                this.compass.heading = Math.round(event.alpha);
+
+                // Access the arrow via Alpine's $refs
+                let arrow = this.$root.querySelector('[x-ref="compassArrow"]');
+                if (arrow) {
+                    arrow.style.transform = `rotate(${360 - this.compass.heading}deg)`;
+                }
+            });
+        } else {
+            this.compass.heading = 'Not Supported';
         }
     },
 
