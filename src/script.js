@@ -42,16 +42,16 @@ document.addEventListener('alpine:init', () => {
       this.selectedGuide = guide;
     },
   }));
-
+  
+  // localStorage
   function saveStateToLocalStorage(key, state) {
     localStorage.setItem(key, JSON.stringify(state));
   }
-  
   function loadStateFromLocalStorage(key, defaultValue) {
     const stored = localStorage.getItem(key);
     return stored ? JSON.parse(stored) : defaultValue;
   }
-
+  
   // Training System
   Alpine.data('training', () => ({
     skillPoints: loadStateFromLocalStorage("skillPoints", 0),
@@ -912,24 +912,28 @@ document.addEventListener('alpine:init', () => {
 
     // Complete a challenge
     completeChallenge(skill, success) {
-      clearInterval(this.challengeInterval);
-      skill.challengeActive = false;
-
-      const targetSubSkill = skill.subSkills.find(subSkill => subSkill.name === skill.challenge.targetSubSkill);
-
-      if (targetSubSkill) {
-        if (success) {
-          targetSubSkill.progress = Math.min(targetSubSkill.progress + 20, 100);
-          this.skillPoints += 10;
-          alert("Challenge completed! Progress updated.");
-        } else {
-          targetSubSkill.progress = Math.max(targetSubSkill.progress - 10, 0);
-          alert("Challenge failed. Progress decreased.");
+        if (this.challengeInterval) {
+            clearInterval(this.challengeInterval);
+            this.challengeInterval = null; // Ensure the interval is fully cleared
         }
-      }
-
-      this.updateSkillLevel(skill);
-      this.selectNewChallenge(skill);
+        
+        skill.challengeActive = false;
+    
+        const targetSubSkill = skill.subSkills.find(subSkill => subSkill.name === skill.challenge.targetSubSkill);
+    
+        if (targetSubSkill) {
+            if (success) {
+                targetSubSkill.progress = Math.min(targetSubSkill.progress + 20, 100);
+                this.skillPoints += 10;
+                alert("Challenge completed! Progress updated.");
+            } else {
+                targetSubSkill.progress = Math.max(targetSubSkill.progress - 10, 0);
+                alert("Challenge failed. Progress decreased.");
+            }
+        }
+    
+        this.updateSkillLevel(skill);
+        this.selectNewChallenge(skill);
     },
 
     // Select a new challenge
@@ -1989,147 +1993,233 @@ document.addEventListener('alpine:init', () => {
     }
 }));
 
-  // Signal Mirror
-  Alpine.data('signalMirror', () => ({
-    flashing: false,
-    interval: null,
-    sosPattern: [250, 250, 250, 250, 250, 750, 250, 750, 250, 750, 250, 250, 250, 250, 250, 1000],
-    flashIndex: 0,
-    flashScreen() {
-      if (this.flashing) {
-        this.flashIndex = 0;
-        this.runSOS();
-      } else {
-        clearInterval(this.interval);
-        document.getElementById('signalMirror').classList.add('hidden');
-        document.querySelectorAll('.tile').forEach(e => e.classList.remove('hidden'));
-      }
-    },
-    runSOS() {
-      if (!this.flashing) return;
-      let duration = this.sosPattern[this.flashIndex];
-      document.getElementById('signalMirror').classList.toggle('hidden');
-      this.flashIndex++;
-      if (this.flashIndex >= this.sosPattern.length) {
-        setTimeout(() => {
-          this.flashIndex = 0;
-          this.runSOS();
-        }, 2000); // Pause before repeating
-      } else {
-        setTimeout(() => this.runSOS(), duration);
-      }
-    }
-  }));
+  // Survival Tools
+  Alpine.data('survivalTools', () => ({
+    currentVersion: "0.0.3",  // Update this every time you release a new version
+    latestVersion: null,
+    updateAvailable: false,
 
-  // Compass
-  Alpine.data('compass', () => ({
-    heading: 0,
     init() {
-      if ('ondeviceorientationabsolute' in window) {
-        window.addEventListener('deviceorientationabsolute', (event) => {
-          this.heading = Math.round(event.alpha); // Get the heading in degrees
-          this.$refs.compassArrow.style.transform = `rotate(${360 - this.heading}deg)`; // Rotate the arrow
-        });
-      } else {
-        this.heading = 'Not Supported';
-      }
-    }
-  }));
+        this.checkForUpdate();
+    },
 
-  // Pedometer
-  Alpine.data('pedometer', () => ({
-    steps: 0,
-    stepLength: 0.75, // Average step length in meters
-    reset() {
-      this.steps = 0;
-    },
-    init() {
-      if ('ondevicemotion' in window) {
-        let lastY = null;
-        window.addEventListener('devicemotion', (event) => {
-          let y = event.accelerationIncludingGravity.y;
-          if (lastY !== null && Math.abs(y - lastY) > 1) {
-            this.steps++;
-          }
-          lastY = y;
-        });
-      }
-    }
-  }));
+    async checkForUpdate() {
+        try {
+            let response = await fetch('/version.json', { cache: 'no-cache' });
+            let data = await response.json();
+            this.latestVersion = data.version;
 
-  // Morse Code Translator
-  Alpine.data('morseCode', () => ({
-    playing: null,
-    textInput: '',
-    morseOutput: '',
-    morseMap: {
-      'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.', 'G': '--.',
-      'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.',
-      'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-',
-      'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-', 'Y': '-.--', 'Z': '--..',
-      '0': '-----', '1': '.----', '2': '..---', '3': '...--', '4': '....-', '5': '.....',
-      '6': '-....', '7': '--...', '8': '---..', '9': '----.'
-    },
-    updateMorse() {
-      this.morseOutput = this.textInput.toUpperCase().split('')
-        .map(letter => this.morseMap[letter] || ' ')
-        .join(' ');
-    },
-    playMorseCode() {
-      if (this.playing) {
-        this.playing = false; // Stop current playback
-        clearTimeout(this.timeout); // Cancel the queue
-        navigator.vibrate(0); // Stop any ongoing vibration
-        return;
-      }
-      this.playing = true; // Mark as playing
-      let morseSequence = this.morseOutput.split('');
-      let index = 0;
-      let unit = 200; // Base timing unit (200ms for a dot)
-      const playNext = () => {
-        if (!this.playing || index >= morseSequence.length) {
-          this.playing = false;
-          return;
+            if (this.latestVersion !== this.currentVersion) {
+                this.updateAvailable = true;
+            }
+        } catch (error) {
+            console.warn("Could not check for updates:", error);
         }
-        let symbol = morseSequence[index];
-        index++;
-        switch (symbol) {
-          case '.':
-            navigator.vibrate(unit);
-            this.timeout = setTimeout(playNext, unit * 2);
-            break;
-          case '-':
-            navigator.vibrate(unit * 3);
-            this.timeout = setTimeout(playNext, unit * 4);
-            break;
-          case ' ':
-            this.timeout = setTimeout(playNext, unit * 6);
-            break;
-          default:
+    },
+
+    updatePWA() {
+        if (navigator.serviceWorker) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                for (let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
+
+        caches.keys().then(cacheNames => {
+            cacheNames.forEach(cacheName => caches.delete(cacheName));
+        });
+
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    },
+    
+    // Import/Export Data
+    exportAppData() {
+        const appData = {
+            emergencyCategories: JSON.parse(localStorage.getItem("emergencyCategories") || "[]"),
+            guides: JSON.parse(localStorage.getItem("guides") || "[]"),
+            skillPoints: JSON.parse(localStorage.getItem("skillPoints") || "0"),
+            skills: JSON.parse(localStorage.getItem("skills") || "[]")
+        };
+    
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+        const downloadAnchor = document.createElement("a");
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "BeaconAppData.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        document.body.removeChild(downloadAnchor);
+    },
+    importAppData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+    
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            try {
+                const appData = JSON.parse(event.target.result);
+                
+                if (appData) {
+                    localStorage.setItem("emergencyCategories", JSON.stringify(appData.emergencyCategories || []));
+                    localStorage.setItem("guides", JSON.stringify(appData.guides || []));
+                    localStorage.setItem("skillPoints", JSON.stringify(appData.skillPoints || 0));
+                    localStorage.setItem("skills", JSON.stringify(appData.skills || []));
+    
+                    alert("Data imported successfully! Refreshing the page...");
+                    location.reload(); // Refresh the page to apply changes
+                }
+            } catch (error) {
+                alert("Invalid JSON file. Please upload a valid BeaconAppData.json file.");
+            }
+        };
+        
+        reader.readAsText(file);
+    },
+      
+    // 📡 Signal Mirror
+    signalMirror: {
+        flashing: false,
+        interval: null,
+        sosPattern: [250, 250, 250, 250, 250, 750, 250, 750, 250, 750, 250, 250, 250, 250, 250, 1000],
+        flashIndex: 0,
+        flashScreen() {
+            if (this.flashing) {
+                this.flashIndex = 0;
+                this.runSOS();
+            } else {
+                clearInterval(this.interval);
+                document.getElementById('signalMirror').classList.add('hidden');
+                document.querySelectorAll('.tile').forEach(e => e.classList.remove('hidden'));
+            }
+        },
+        runSOS() {
+            if (!this.flashing) return;
+            let duration = this.sosPattern[this.flashIndex];
+            document.getElementById('signalMirror').classList.toggle('hidden');
+            this.flashIndex++;
+            if (this.flashIndex >= this.sosPattern.length) {
+                setTimeout(() => {
+                    this.flashIndex = 0;
+                    this.runSOS();
+                }, 2000);
+            } else {
+                setTimeout(() => this.runSOS(), duration);
+            }
+        }
+    },
+
+    // 🧭 Compass
+    compass: {
+        heading: 0,
+        init() {
+            if ('ondeviceorientationabsolute' in window) {
+                window.addEventListener('deviceorientationabsolute', (event) => {
+                    this.heading = Math.round(event.alpha);
+                    this.$refs.compassArrow.style.transform = `rotate(${360 - this.heading}deg)`;
+                });
+            } else {
+                this.heading = 'Not Supported';
+            }
+        }
+    },
+
+    // 🚶 Pedometer
+    pedometer: {
+        steps: 0,
+        stepLength: 0.75, // Average step length in meters
+        reset() {
+            this.steps = 0;
+        },
+        init() {
+            if ('ondevicemotion' in window) {
+                let lastY = null;
+                window.addEventListener('devicemotion', (event) => {
+                    let y = event.accelerationIncludingGravity.y;
+                    if (lastY !== null && Math.abs(y - lastY) > 1) {
+                        this.steps++;
+                    }
+                    lastY = y;
+                });
+            }
+        }
+    },
+
+    // 📝 Morse Code Translator
+    morseCode: {
+        playing: null,
+        textInput: '',
+        morseOutput: '',
+        morseMap: {
+            'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.', 'G': '--.',
+            'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.',
+            'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-',
+            'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-', 'Y': '-.--', 'Z': '--..',
+            '0': '-----', '1': '.----', '2': '..---', '3': '...--', '4': '....-', '5': '.....',
+            '6': '-....', '7': '--...', '8': '---..', '9': '----.'
+        },
+        updateMorse() {
+            this.morseOutput = this.textInput.toUpperCase().split('')
+                .map(letter => this.morseMap[letter] || ' ')
+                .join(' ');
+        },
+        playMorseCode() {
+            if (this.playing) {
+                this.playing = false;
+                clearTimeout(this.timeout);
+                navigator.vibrate(0);
+                return;
+            }
+            this.playing = true;
+            let morseSequence = this.morseOutput.split('');
+            let index = 0;
+            let unit = 200;
+            const playNext = () => {
+                if (!this.playing || index >= morseSequence.length) {
+                    this.playing = false;
+                    return;
+                }
+                let symbol = morseSequence[index];
+                index++;
+                switch (symbol) {
+                    case '.':
+                        navigator.vibrate(unit);
+                        this.timeout = setTimeout(playNext, unit * 2);
+                        break;
+                    case '-':
+                        navigator.vibrate(unit * 3);
+                        this.timeout = setTimeout(playNext, unit * 4);
+                        break;
+                    case ' ':
+                        this.timeout = setTimeout(playNext, unit * 6);
+                        break;
+                    default:
+                        playNext();
+                }
+            };
             playNext();
         }
-      };
-      playNext();
-    }
-  }));
-
-  // Level Tool
-  Alpine.data('levelTool', () => ({
-    x: 0,
-    y: 0,
-    initLevel() {
-      if ('ondevicemotion' in window) {
-        window.addEventListener('devicemotion', (event) => {
-          if (event.accelerationIncludingGravity) {
-            this.x = event.accelerationIncludingGravity.x.toFixed(2);
-            this.y = event.accelerationIncludingGravity.y.toFixed(2);
-          }
-        });
-      }
     },
-    bubbleX() { return `translateX(${this.x * 10}px)`; },
-    bubbleY() { return `translateY(${this.y * 10}px)`; }
-  }));
+
+    // 📏 Level Tool
+    levelTool: {
+        x: 0,
+        y: 0,
+        init() {
+            if ('ondevicemotion' in window) {
+                window.addEventListener('devicemotion', (event) => {
+                    if (event.accelerationIncludingGravity) {
+                        this.x = event.accelerationIncludingGravity.x.toFixed(2);
+                        this.y = event.accelerationIncludingGravity.y.toFixed(2);
+                    }
+                });
+            }
+        },
+        bubbleX() { return `translateX(${this.x * 10}px)`; },
+        bubbleY() { return `translateY(${this.y * 10}px)`; }
+    }
+}));
 
   // Guides
   Alpine.data("library", () => ({

@@ -256,7 +256,27 @@
     </div>
 
     <!-- Tools Tab -->
-    <div x-show="activeTab === 'tools'" class="container grid grid-cols-2 gap-4">
+    <div x-show="activeTab === 'tools'" class="container grid grid-cols-2 gap-4" x-data="survivalTools">
+      <!-- Backup & Restore Data -->
+      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2">
+        <h2 class="text-xl font-semibold text-white">Beacon v<span x-text="currentVersion"></span></h2>
+  
+        <button x-show="updateAvailable" @click="updatePWA()" class="mt-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+          Update Beacon
+        </button>
+
+        <div class="grid grid-cols-2 gap-4">
+          <button @click="exportAppData()" class="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
+              Export Data
+          </button>
+      
+          <label class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition cursor-pointer">
+              Import Data
+              <input type="file" accept=".json" class="hidden" @change="importAppData(event)">
+          </label>
+        </div>
+      </article>
+
       <!-- SOS Signal -->
       <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center" x-data="{ playing: false }">
         <button class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors" @click="playing = !playing; playing ? $refs.sos.play() : ($refs.sos.pause(), $refs.sos.currentTime = 0);" x-text="playing ? 'STOP SOS' : 'SOS'">
@@ -267,15 +287,15 @@
       </article>
 
       <!-- Signal Mirror -->
-      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center" x-data="signalMirror">
-        <button class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors" @click="flashing = !flashing; flashScreen();">
-          <span x-text="flashing ? 'STOP Flash' : 'Signal Mirror'"></span>
+      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center">
+        <button class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors" @click="signalMirror.flashing = !signalMirror.flashing; signalMirror.flashScreen();">
+          <span x-text="signalMirror.flashing ? 'STOP Flash' : 'Signal Mirror'"></span>
         </button>
       </article>
 
       <!-- Compass -->
-      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center" x-data="compass">
-        <span x-text="heading"></span>
+      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center">
+        <span x-text="compass.heading"></span>
         <svg class="w-full my-4" viewBox="0 0 512 512">
           <path d="M 255.5 0.024 C 255.06 0.105 254.62 0.228 254.221 0.341 L 253.903 0.341 C 115.633 1.702 3.354 113.11 0.632 251.054 L 0.632 251.371 C -0.728 254.201 -0.728 257.495 0.632 260.325 L 0.632 260.653 C 3.027 399.742 116.799 512 256.462 512 L 259.02 512 C 398.365 510.598 511.248 397.511 512.291 258.084 C 512.371 257.449 512.371 256.806 512.291 256.17 L 512.291 254.891 C 512.331 254.466 512.331 254.038 512.291 253.612 C 510.93 114.39 397.966 1.538 258.703 0.341 C 257.661 0.055 256.578 -0.052 255.5 0.024 Z M 244.315 21.114 C 244.949 21.073 245.594 21.155 246.229 21.114 L 246.229 31.04 C 246.188 34.724 248.111 38.152 251.304 40.035 C 254.507 41.877 258.416 41.877 261.619 40.035 C 264.812 38.152 266.736 34.714 266.695 31.04 L 266.695 21.124 C 388.654 26.333 486.299 123.978 491.508 245.937 L 479.678 245.937 C 474.04 246.449 469.875 251.494 470.397 257.132 C 470.919 262.761 475.953 266.925 481.592 266.404 L 491.508 266.404 C 486.299 388.363 388.654 486.008 266.695 491.216 L 266.695 481.3 C 266.799 478.357 265.63 475.51 263.487 473.49 C 261.343 471.47 258.432 470.471 255.5 470.75 C 255.06 470.832 254.62 470.955 254.221 471.067 C 249.461 472.142 246.118 476.422 246.229 481.3 L 246.229 491.216 C 124.269 486.008 26.624 388.363 21.416 266.404 L 31.332 266.404 C 35.016 266.444 38.444 264.521 40.327 261.328 C 42.165 258.135 42.165 254.205 40.327 251.013 C 38.444 247.82 35.005 245.896 31.332 245.937 L 21.416 245.937 C 26.573 124.623 123.236 27.244 244.315 21.124 L 244.315 21.114 Z" fill="currentColor"></path>
           <g x-ref="compassArrow" style="transform-origin: center;">
@@ -285,27 +305,27 @@
       </article>
 
       <!-- Pedometer -->
-      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center" x-data="pedometer">
-        <p>Steps Taken: <span x-text="steps"></span></p>
-        <p>Estimated Distance: <span x-text="(steps * stepLength).toFixed(2)"></span> meters</p>
-        <button @click="reset()" class="w-full mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">Reset</button>
+      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center">
+        <p>Steps Taken: <span x-text="pedometer.steps"></span></p>
+        <p>Estimated Distance: <span x-text="(pedometer.steps * pedometer.stepLength).toFixed(2)"></span> meters</p>
+        <button @click="pedometer.reset()" class="w-full mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">Reset</button>
       </article>
 
       <!-- Morse Code Translator -->
-      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2" x-data="morseCode">
+      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2">
         <span class="text-2xl mb-4">Morse Code</span>
         <fieldset class="flex w-full gap-0">
-          <input x-model="textInput" @input="updateMorse()" type="text" placeholder="Enter text..." class="w-full px-4 py-2 bg-gray-700 text-white rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <button @click="playMorseCode()" class="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600 transition-colors" x-text="playing ? 'Stop' : 'Play'">Play</button>
+          <input x-model="morseCode.textInput" @input="morseCode.updateMorse()" type="text" placeholder="Enter text..." class="w-full px-4 py-2 bg-gray-700 text-white rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <button @click="morseCode.playMorseCode()" class="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600 transition-colors" x-text="morseCode.playing ? 'Stop' : 'Play'">Play</button>
         </fieldset>
-        <p x-text="morseOutput" class="text-lg mt-2"></p>
+        <p x-text="morseCode.morseOutput" class="text-lg mt-2"></p>
       </article>
 
       <!-- Level Tool -->
-      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2" x-data="levelTool" x-init="initLevel()">
+      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2">
         <span class="text-2xl mb-4">Level Tool</span>
         <div class="relative w-full h-40 border-4 border-gray-700 rounded-full flex justify-center items-center overflow-hidden bg-gray-200">
-          <div class="absolute w-8 h-8 bg-green-500 rounded-full transition-transform" :style="'transform: ' + bubbleX() + ' ' + bubbleY()"></div>
+          <div class="absolute w-8 h-8 bg-green-500 rounded-full transition-transform" :style="'transform: ' + levelTool.bubbleX() + ' ' + levelTool.bubbleY()"></div>
         </div>
         <p class="mt-4 text-sm">Tilt your device to see the bubble move.</p>
       </article>
