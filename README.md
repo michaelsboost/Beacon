@@ -1,11 +1,11 @@
 # 📖 Beacon Survival App
 
-![Beacon Screenshot]([https://raw.githubusercontent.com/michaelsboost/PWAConverter/gh-pages/imgs/screenshots/1training.png](https://github.com/michaelsboost/Beacon/blob/main/imgs/screenshots/1training.png?raw=true))
+![](https://raw.githubusercontent.com/michaelsboost/Beacon/gh-pages/imgs/screenshots/1training.png)
 
 ## 🌟 Overview
 The **Beacon Survival App** is an **interactive survival training tool** designed to help users build critical survival skills through **guides, training simulations, emergency checklists, and scenario-based challenges**. It includes **real-time progress tracking, skill meters, local storage integration, and an interactive UI** powered by **Alpine.js**.
 
-[![MIT License](https://img.shields.io/github/license/michaelsboost/PWAConverter)](LICENSE) [![GitHub Stars](https://img.shields.io/github/stars/michaelsboost/PWAConverter)](https://github.com/michaelsboost/PWAConverter/stargazers) [![GitHub Issues](https://img.shields.io/github/issues/michaelsboost/PWAConverter)](https://github.com/michaelsboost/PWAConverter/issues)
+[![MIT License](https://img.shields.io/github/license/michaelsboost/Beacon)](LICENSE) [![GitHub Stars](https://img.shields.io/github/stars/michaelsboost/Beacon)](https://github.com/michaelsboost/Beacon/stargazers) [![GitHub Issues](https://img.shields.io/github/issues/michaelsboost/Beacon)](https://github.com/michaelsboost/Beacon/issues)
 
 > 🛠️ **Built Entirely with kodeWeave**  
 > This app was developed using **[kodeWeave](https://michaelsboost.com/kodeweave)**, a powerful coding playground that allows developers to write, test, and refine web applications from anywhere.
