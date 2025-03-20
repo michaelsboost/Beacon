@@ -17,7 +17,7 @@ document.addEventListener('alpine:init', () => {
         }
       }
     },
-    activeTab: 'training',
+    activeTab: loadStateFromLocalStorage('activeTab', 'training'),
     selectedGuide: null,
     searchQuery: '',
     activeCategory: 'all',
@@ -35,6 +35,12 @@ document.addEventListener('alpine:init', () => {
         );
       }
       return guides;
+    },
+
+    // Method to set active tab and store it
+    setActiveTab(tab) {
+        this.activeTab = tab;
+        saveStateToLocalStorage('activeTab', tab);
     },
 
     // Open Guide
@@ -1335,7 +1341,15 @@ document.addEventListener('alpine:init', () => {
 
   // Resource Management Mini-Game
   Alpine.data('resourceGame', () => ({
-    resources: { water: 10, food: 5 },
+    resources: { 
+        water: 10,  // Fresh clean water supply
+        food: 5,    // General food supply (can be raw, cooked, or canned)
+        cookedMeat: 0,  // Safe cooked meat
+        rawMeat: 0,     // Needs to be cooked or may cause sickness
+        cannedFood: 2,  // Long-lasting but heavy food source
+        staleWater: 0,  // Unsafe water that may cause sickness
+        boiledWater: 0  // Safe water purified via fire
+    },
     energy: 100,
     health: 100,
     hunger: 0, // Hunger level (0 = full, 100 = starving)
@@ -1347,7 +1361,10 @@ document.addEventListener('alpine:init', () => {
     injury: null,
     sickness: null,
     pet: null,
-    inventory: ["wood", "stone", "rope", "charcoal", "medicine"], // Starting inventory
+    inventory: [
+        "bone knife", "wood", "stone", "rope", "charcoal", "medicine", 
+        "bandages", "wild herbs", "fish", "nuts", "berries", "flint"
+    ],
     showStats: false,
     showInventory: false,
     showConsumption: false,
@@ -1365,121 +1382,250 @@ document.addEventListener('alpine:init', () => {
   
     // Update hunger, thirst, and health
     updateStatus() {
-      // Increase hunger and thirst over time
-      this.hunger = Math.min(this.hunger + 1, 100);
-      this.thirst = Math.min(this.thirst + 1, 100);
-  
-      // Apply effects of hunger and thirst
-      if (this.hunger >= 80) {
-        this.health -= 2;
-        this.eventLog = "You're starving! Your health is deteriorating.";
-      }
-      if (this.thirst >= 80) {
-        this.health -= 2;
-        this.eventLog = "You're dehydrated! Your health is deteriorating.";
-      }
-  
-      // Apply effects of injuries
-      if (this.injury) {
-        this.health -= 1;
-        this.eventLog = `Your ${this.injury} is getting worse! Seek treatment soon.`;
-      }
-  
-      // Check for death
-      if (this.health <= 0) {
-        this.eventLog = "You have died. Game over.";
-        this.alertMessage = "Game Over! Refresh to restart.";
-        return;
-      }
-  
-      // Notify player of critical status
-      if (this.health < 30) {
-        this.alertMessage = "You're in critical condition! Rest or find medicine.";
-      } else if (this.energy < 20) {
-        this.alertMessage = "You're feeling fatigued. Rest to regain energy.";
-      } else if (this.hunger >= 80) {
-        this.alertMessage = "You're starving! Find food immediately.";
-      } else if (this.thirst >= 80) {
-        this.alertMessage = "You're dehydrated! Find water immediately.";
-      } else {
-        this.alertMessage = "";
-      }
+        // Ensure hunger and thirst never exceed 100
+        this.hunger = Math.min(this.hunger + 1, 100);
+        this.thirst = Math.min(this.thirst + 1, 100);
+    
+        // Apply effects of hunger and thirst
+        if (this.hunger >= 80) {
+            this.health = Math.max(this.health - 2, 0);
+            this.eventLog = "You're starving! Your health is deteriorating.";
+        }
+        if (this.thirst >= 80) {
+            this.health = Math.max(this.health - 2, 0);
+            this.eventLog = "You're dehydrated! Your health is deteriorating.";
+        }
+    
+        // Apply effects of injuries
+        if (this.injury) {
+            this.health = Math.max(this.health - 1, 0);
+            this.eventLog = `Your ${this.injury} is getting worse! Seek treatment soon.`;
+        }
+    
+        // Check for death
+        if (this.health <= 0) {
+            this.eventLog = "You have died. Game over.";
+            this.alertMessage = "Game Over! Refresh to restart.";
+            return;
+        }
+    
+        // Notify player of critical status
+        if (this.health < 30) {
+            this.alertMessage = "You're in critical condition! Rest or find medicine.";
+        } else if (this.energy < 20) {
+            this.alertMessage = "You're feeling fatigued. Rest to regain energy.";
+        } else if (this.hunger >= 80) {
+            this.alertMessage = "You're starving! Find food immediately.";
+        } else if (this.thirst >= 80) {
+            this.alertMessage = "You're dehydrated! Find water immediately.";
+        } else {
+            this.alertMessage = "";
+        }
     },
-  
+    
     // Consume resources
     consume(type) {
-      if (type === "food" && this.resources.food > 0) {
-        this.resources.food -= 1;
-        this.hunger = Math.max(this.hunger - 20, 0);
-        this.energy = Math.min(this.energy + 15, 100);
-        this.eventLog = "You ate food and regained 15 energy.";
-      } else if (type === "water" && this.resources.water > 0) {
-        this.resources.water -= 1;
-        this.thirst = Math.max(this.thirst - 20, 0);
-        this.health = Math.min(this.health + 5, 100);
-        this.eventLog = "You drank water and feel refreshed.";
-      } else if (type === "medicine" && this.inventory.includes("medicine")) {
-        this.inventory.splice(this.inventory.indexOf("medicine"), 1);
-        this.health = Math.min(this.health + 30, 100);
-        if (this.sickness) this.sickness = null;
-        this.eventLog = "You took medicine and recovered some health.";
-      } else {
-        this.eventLog = "You don't have enough resources for that action.";
-      }
-      this.checkForNextDay();
+        if (type === "food") {
+            const foodItems = [
+                { name: "cooked meat", hunger: 30, energy: 20, sickness: 0 },
+                { name: "raw meat", hunger: 15, energy: 10, sickness: 0.3 }, // 30% chance of sickness
+                { name: "fish", hunger: 15, energy: 10, sickness: 0.1 }, // 10% sickness chance
+                { name: "canned food", hunger: 20, energy: 15, sickness: 0 }, // Safe food
+                { name: "berries", hunger: 5, energy: 5, sickness: 0.1 }, // Mild sickness risk
+                { name: "nuts", hunger: 10, energy: 8, sickness: 0 },
+                { name: "mushrooms", hunger: 10, energy: 5, sickness: 0.2 }, // 20% chance of being poisonous
+                { name: "edible plants", hunger: 8, energy: 5, sickness: 0 },
+                { name: "wild herbs", hunger: 5, energy: 2, sickness: 0 }
+            ];
+    
+            let consumed = false;
+            for (let food of foodItems) {
+                if (this.inventory.includes(food.name)) {
+                    this.inventory.splice(this.inventory.indexOf(food.name), 1);
+                    this.hunger = Math.max(this.hunger - food.hunger, 0);
+                    this.energy = Math.min(this.energy + food.energy, 100);
+                    if (Math.random() < food.sickness) {
+                        this.sickness = "Food Poisoning";
+                        this.eventLog = `You ate ${food.name} and got food poisoning!`;
+                    } else {
+                        this.eventLog = `You ate ${food.name} and regained energy.`;
+                    }
+                    consumed = true;
+                    break;
+                }
+            }
+    
+            if (!consumed && this.resources.food > 0) {
+                this.resources.food -= 1;
+                this.hunger = Math.max(this.hunger - 20, 0);
+                this.energy = Math.min(this.energy + 15, 100);
+                this.eventLog = "You ate food and regained energy.";
+            } else if (!consumed) {
+                this.eventLog = "You don't have any food!";
+            }
+        } 
+        
+        else if (type === "water") {
+            const waterItems = [
+                { name: "boiled water", thirst: 25, health: 10, sickness: 0 }, // Safe to drink
+                { name: "fresh water", thirst: 20, health: 5, sickness: 0.05 }, // Slight risk
+                { name: "stale water", thirst: 10, health: 0, sickness: 0.3 }, // 30% sickness chance
+                { name: "rainwater", thirst: 15, health: 5, sickness: 0.1 } // 10% chance of being contaminated
+            ];
+    
+            let consumed = false;
+            for (let water of waterItems) {
+                if (this.inventory.includes(water.name)) {
+                    this.inventory.splice(this.inventory.indexOf(water.name), 1);
+                    this.thirst = Math.max(this.thirst - water.thirst, 0);
+                    this.health = Math.min(this.health + water.health, 100);
+                    if (Math.random() < water.sickness) {
+                        this.sickness = "Stomach Infection";
+                        this.eventLog = `You drank ${water.name} and got sick!`;
+                    } else {
+                        this.eventLog = `You drank ${water.name} and feel refreshed.`;
+                    }
+                    consumed = true;
+                    break;
+                }
+            }
+    
+            if (!consumed && this.resources.water > 0) {
+                this.resources.water -= 1;
+                this.thirst = Math.max(this.thirst - 20, 0);
+                this.health = Math.min(this.health + 5, 100);
+                this.eventLog = "You drank water and feel refreshed.";
+            } else if (!consumed) {
+                this.eventLog = "You have no water!";
+            }
+        } 
+        
+        else if (type === "medicine") {
+            if (this.inventory.includes("medicine")) {
+                this.inventory.splice(this.inventory.indexOf("medicine"), 1);
+                this.health = Math.min(this.health + 30, 100);
+                this.sickness = null;
+                this.eventLog = "You took medicine and recovered some health.";
+            } else if (this.inventory.includes("herbal tea")) {
+                this.inventory.splice(this.inventory.indexOf("herbal tea"), 1);
+                this.health = Math.min(this.health + 15, 100);
+                this.sickness = null;
+                this.eventLog = "You drank herbal tea and feel better.";
+            } else {
+                this.eventLog = "You don't have medicine!";
+            }
+        }
+    
+        this.checkForNextDay();
     },
   
     // Forage for food
     forageFood() {
-      if (this.energy < 10) {
-        this.eventLog = "You're too exhausted to forage!";
-        return;
-      }
-      this.energy -= 10;
-      const foodFound = Math.floor(Math.random() * 3) + 1;
-      this.resources.food += foodFound;
-      this.eventLog = `You foraged and found ${foodFound} kg of food.`;
-      this.checkForNextDay();
+        if (this.energy < 10) {
+            this.eventLog = "You're too exhausted to forage!";
+            return;
+        }
+    
+        this.energy -= 10;
+    
+        const biomes = ["forest", "mountains", "swamp", "city"];
+        const selectedBiome = biomes[Math.floor(Math.random() * biomes.length)];
+        
+        const lootTable = {
+            forest: ["berries", "nuts", "mushrooms", "edible plants"],
+            mountains: ["roots", "mushrooms", "wild herbs"],
+            swamp: ["fish", "toxic plants", "frogs"],
+            city: ["canned food", "stale water", "scraps"]
+        };
+    
+        let foundItem = lootTable[selectedBiome][Math.floor(Math.random() * lootTable[selectedBiome].length)];
+        
+        if (foundItem === "toxic plants" || foundItem === "mushrooms" && Math.random() < 0.2) {
+            this.sickness = "Poisoning";
+            this.eventLog = `You foraged in the ${selectedBiome} and found ${foundItem}, but it made you sick!`;
+        } else {
+            this.inventory.push(foundItem);
+            this.eventLog = `You foraged in the ${selectedBiome} and found ${foundItem}.`;
+        }
+    
+        this.checkForNextDay();
     },
   
     // Collect water
     collectWater() {
-      if (this.energy < 8) {
-        this.eventLog = "You're too exhausted to collect water!";
-        return;
-      }
-      this.energy -= 8;
-      const waterCollected = Math.floor(Math.random() * 4) + 1;
-      this.resources.water += waterCollected;
-      this.eventLog = `You collected ${waterCollected} liters of fresh water!`;
-      this.checkForNextDay();
+        if (this.energy < 8) {
+            this.eventLog = "You're too exhausted to collect water!";
+            return;
+        }
+    
+        this.energy -= 8;
+    
+        const waterSources = ["river", "lake", "puddle", "rainwater"];
+        const selectedSource = waterSources[Math.floor(Math.random() * waterSources.length)];
+    
+        let waterCollected = Math.floor(Math.random() * 4) + 1;
+    
+        if (selectedSource === "puddle" && Math.random() < 0.3) {
+            this.inventory.push("stale water");
+            this.eventLog = `You collected ${waterCollected} liters of water from a puddle, but it looks questionable.`;
+        } else {
+            this.inventory.push("fresh water");
+            this.eventLog = `You collected ${waterCollected} liters of fresh water from a ${selectedSource}!`;
+        }
+    
+        this.checkForNextDay();
     },
   
     // Hunt for food and pelts
     hunt() {
-      if (this.energy < 15) {
-        this.eventLog = "You're too exhausted to hunt!";
-        return;
-      }
-      this.energy -= 15;
-      const success = Math.random() > 0.4;
-      if (success) {
-        const foodGained = Math.floor(Math.random() * 5) + 2;
-        this.resources.food += foodGained;
-        const peltChance = Math.random();
-        if (peltChance < 0.5) {
-          this.inventory.push("pelt");
-          this.eventLog = `You hunted and got ${foodGained} kg of meat and a pelt!`;
-        } else {
-          this.eventLog = `You hunted and got ${foodGained} kg of meat!`;
+        if (this.energy < 15) {
+            this.eventLog = "You're too exhausted to hunt!";
+            return;
         }
-      } else {
-        const injuries = ["Sprained Ankle", "Broken Arm", "Animal Bite", "Deep Cut"];
-        this.injury = injuries[Math.floor(Math.random() * injuries.length)];
-        this.health -= 10;
-        this.eventLog = `Your hunt failed, and you got injured: ${this.injury}.`;
-      }
-      this.checkForNextDay();
+    
+        this.energy -= 15;
+        const weapons = {
+            "bare hands": { success: 0.3, bonusMeat: 0 },
+            "bone knife": { success: 0.5, bonusMeat: 1 },
+            "spear": { success: 0.7, bonusMeat: 2 },
+            "bow": { success: 0.85, bonusMeat: 3 },
+            "trap": { success: 0.9, bonusMeat: 2 }
+        };
+    
+        let bestWeapon = "bare hands";
+        for (let weapon in weapons) {
+            if (this.inventory.includes(weapon)) {
+                bestWeapon = weapon;
+                break;
+            }
+        }
+    
+        let weaponStats = weapons[bestWeapon];
+        let huntSuccess = Math.random() < weaponStats.success;
+    
+        if (huntSuccess) {
+            const animals = [
+                { name: "Rabbit", chance: 0.4, baseMeat: 2 },
+                { name: "Deer", chance: 0.3, baseMeat: 5 },
+                { name: "Boar", chance: 0.2, baseMeat: 7 },
+                { name: "Wolf", chance: 0.1, baseMeat: 6 },
+                { name: "Bear", chance: 0.05, baseMeat: 12 }
+            ];
+    
+            let animal = animals.find(a => Math.random() < a.chance);
+            let meatGained = animal.baseMeat + weaponStats.bonusMeat;
+    
+            this.resources.food += meatGained;
+            this.inventory.push("pelt");
+    
+            this.eventLog = `You successfully hunted a ${animal.name} and got +${meatGained} kg of meat and a pelt!`;
+    
+        } else {
+            this.health -= 10;
+            this.eventLog = "Your hunt failed, and you got injured.";
+        }
+    
+        this.checkForNextDay();
     },
   
     // Rest to regain energy and health
@@ -1492,65 +1638,183 @@ document.addEventListener('alpine:init', () => {
   
     // Explore to find loot
     explore() {
-      if (this.energy < 10) {
-        this.eventLog = "You're too exhausted to explore!";
-        return;
-      }
-      this.energy -= 10;
-      const find = Math.random();
-      if (find < 0.3) {
-        this.inventory.push("medicine");
-        this.eventLog = "You found a hidden stash of medicine!";
-      } else if (find < 0.6) {
-        this.inventory.push("fur");
-        this.eventLog = "You discovered an animal carcass and skinned it for fur!";
-      } else {
-        this.eventLog = "You explored but found nothing useful.";
-      }
-      this.checkForNextDay();
+        if (this.energy < 10) {
+            this.eventLog = "You're too exhausted to explore!";
+            return;
+        }
+    
+        this.energy -= 10;
+        const biomes = ["forest", "mountains", "abandonedCamp", "riverbank", "cave", "city"];
+        const selectedBiome = biomes[Math.floor(Math.random() * biomes.length)];
+        let foundItem = null;
+    
+        const lootTable = {
+            forest: {
+                common: ["wood", "berries", "rope"],
+                uncommon: ["fur", "bone", "mushrooms"],
+                rare: ["hidden map", "camouflageGear"]
+            },
+            mountains: {
+                common: ["stone", "rope"],
+                uncommon: ["flint", "bone knife", "metal ore"],
+                rare: ["ancient artifact", "compass"]
+            },
+            abandonedCamp: {
+                common: ["charcoal", "stale water", "cloth"],
+                uncommon: ["fire starter", "bandages", "alcohol"],
+                rare: ["medicine", "reinforcedDoor"]
+            },
+            riverbank: {
+                common: ["stick", "fish", "water"],
+                uncommon: ["hook", "clay", "herbs"],
+                rare: ["boiled water", "gold coin"]
+            },
+            cave: {
+                common: ["stone", "bone"],
+                uncommon: ["bat meat", "fire starter"],
+                rare: ["hidden treasure", "ancient artifact"]
+            },
+            city: {
+                common: ["scrap metal", "plastic bottle", "cloth"],
+                uncommon: ["electronics", "batteries", "canned food", "bandages"],
+                rare: ["firearm", "ammo", "gold watch", "blueprints"]
+            }
+        };
+    
+        const find = Math.random();
+        if (find < 0.5) foundItem = lootTable[selectedBiome].common[Math.floor(Math.random() * lootTable[selectedBiome].common.length)];
+        else if (find < 0.8) foundItem = lootTable[selectedBiome].uncommon[Math.floor(Math.random() * lootTable[selectedBiome].uncommon.length)];
+        else foundItem = lootTable[selectedBiome].rare[Math.floor(Math.random() * lootTable[selectedBiome].rare.length)];
+    
+        if (foundItem) {
+            // ✅ Auto-add food and water to resources instead of inventory
+            if (["fish", "berries", "mushrooms", "bat meat", "canned food"].includes(foundItem)) {
+                this.resources.food += 2;
+                this.eventLog = `You explored the ${selectedBiome} and found food: ${foundItem}! +2 kg food.`;
+            } else if (["water", "boiled water", "stale water"].includes(foundItem)) {
+                this.resources.water += 2;
+                this.eventLog = `You explored the ${selectedBiome} and found water: ${foundItem}! +2 liters water.`;
+            } else {
+                this.inventory.push(foundItem);
+                this.eventLog = `You explored the ${selectedBiome} and found ${foundItem}!`;
+            }
+        } else {
+            this.eventLog = `You explored the ${selectedBiome} but found nothing useful.`;
+        }
+    
+        this.checkForNextDay();
     },
   
     // Trade items for resources
     trade() {
-      if (this.inventory.includes("pelt")) {
-        this.inventory.splice(this.inventory.indexOf("pelt"), 1);
-        this.resources.food += 5;
-        this.eventLog = "You traded a pelt for 5 kg of food!";
-      } else if (this.inventory.includes("fur")) {
-        this.inventory.splice(this.inventory.indexOf("fur"), 1);
-        this.resources.food += 3;
-        this.eventLog = "You traded fur for 3 kg of food!";
-      } else {
-        this.eventLog = "You have nothing to trade.";
-      }
-      this.checkForNextDay();
+        if (this.inventory.length === 0) {
+            this.eventLog = "You have nothing to trade.";
+            return;
+        }
+    
+        const traders = [
+            { type: "Fair Trader", bonusChance: 0.3, scamChance: 0 },
+            { type: "Greedy Merchant", bonusChance: 0.1, scamChance: 0.2 },
+            { type: "Black Market Dealer", bonusChance: 0.5, scamChance: 0.4 },
+            { type: "Nomadic Hunter", bonusChance: 0.25, scamChance: 0.05 },
+            { type: "Shady Smuggler", bonusChance: 0.6, scamChance: 0.3 }
+        ];
+    
+        let trader = traders[Math.floor(Math.random() * traders.length)];
+        let tradeItem = this.inventory[Math.floor(Math.random() * this.inventory.length)];
+    
+        const tradeValues = {
+            wood: { food: 2 }, stone: { food: 2 }, rope: { food: 3 },
+            berries: { food: 2 }, mushrooms: { food: 3 }, cannedFood: { food: 5 },
+            fish: { food: 4 }, batMeat: { food: 5 }, bone: { food: 3 },
+            fireStarter: { food: 7 }, medicine: { food: 10, water: 2 },
+            alcohol: { food: 8, water: 2 }, bandages: { food: 5 }, herbs: { food: 4 },
+            goldCoin: { food: 15, water: 5 }, ancientArtifact: { food: 20, water: 10 },
+            staleWater: { water: 2 }, boiledWater: { water: 5 }
+        };
+    
+        if (Math.random() < trader.scamChance) {
+            this.inventory.splice(this.inventory.indexOf(tradeItem), 1);
+            this.eventLog = `${trader.type} scammed you! You lost ${tradeItem} without getting anything.`;
+        } else {
+            let foodGained = tradeValues[tradeItem]?.food || 0;
+            let waterGained = tradeValues[tradeItem]?.water || 0;
+            this.resources.food += foodGained;
+            this.resources.water += waterGained;
+            this.inventory.splice(this.inventory.indexOf(tradeItem), 1);
+    
+            this.eventLog = `You traded ${tradeItem} with a ${trader.type} for ${foodGained} kg of food and ${waterGained} liters of water.`;
+    
+            if (Math.random() < trader.bonusChance) {
+                let bonusFood = Math.floor(Math.random() * 3) + 2;
+                let bonusWater = Math.floor(Math.random() * 2) + 1;
+                this.resources.food += bonusFood;
+                this.resources.water += bonusWater;
+                this.eventLog += ` The trader gave you a bonus: +${bonusFood} food, +${bonusWater} water!`;
+            }
+        }
+    
+        this.checkForNextDay();
     },
   
     // Crafting recipes
     craftingRecipes: {
-      spear: { materials: ["wood", "stone"], energy: 15 },
-      bow: { materials: ["wood", "rope", "stone"], energy: 25 },
-      axe: { materials: ["wood", "stone", "rope"], energy: 20 },
-      knife: { materials: ["stone", "rope"], energy: 10 },
-      fishingRod: { materials: ["rope", "stick", "hook"], energy: 15 },
-      fireStarter: { materials: ["charcoal", "wood"], energy: 10 },
-      waterFilter: { materials: ["charcoal", "cloth", "sand"], energy: 10 },
-      clayPot: { materials: ["clay", "fire"], energy: 15 },
-      cookingGrill: { materials: ["metal", "rope"], energy: 20 },
-      shelter: { materials: ["wood", "rope"], energy: 20 },
-      raft: { materials: ["wood", "rope"], energy: 30 },
-      tent: { materials: ["cloth", "rope", "wood"], energy: 25 },
-      warmClothing: { materials: ["fur", "cloth"], energy: 20 },
-      snowshoes: { materials: ["wood", "rope"], energy: 10 },
-      camouflageGear: { materials: ["cloth", "mud"], energy: 15 },
-      herbalTea: { materials: ["herbs", "boiled water"], energy: 5 },
-      bandages: { materials: ["cloth", "herbs"], energy: 5 },
-      antiseptic: { materials: ["alcohol", "herbs"], energy: 10 },
-      painkillers: { materials: ["herbs", "water"], energy: 10 },
-      metalTools: { materials: ["metal", "fire", "rope"], energy: 30 },
-      storageBox: { materials: ["wood", "rope"], energy: 15 },
-      animalTraps: { materials: ["rope", "wood", "bait"], energy: 20 },
-      smoker: { materials: ["wood", "rope", "fire"], energy: 25 }
+        // 🔪 Basic Tools
+        spear: { materials: ["wood", "stone"], energy: 15 },
+        bow: { materials: ["wood", "rope", "stone"], energy: 25 },
+        axe: { materials: ["wood", "stone", "rope"], energy: 20 },
+        knife: { materials: ["stone", "rope"], energy: 10 },
+        boneKnife: { materials: ["bone", "rope"], energy: 10 },
+        fishingRod: { materials: ["rope", "stick", "hook"], energy: 15 },
+        
+        // 🔥 Fire & Cooking
+        fireStarter: { materials: ["charcoal", "wood"], energy: 10 },
+        clayPot: { materials: ["clay", "fire"], energy: 15 },
+        cookingGrill: { materials: ["metal", "rope"], energy: 20 },
+        smoker: { materials: ["wood", "rope", "fire"], energy: 25 },
+        
+        // 🏠 Shelter & Survival
+        shelter: { materials: ["wood", "rope"], energy: 20 },
+        raft: { materials: ["wood", "rope"], energy: 30 },
+        tent: { materials: ["cloth", "rope", "wood"], energy: 25 },
+        storageBox: { materials: ["wood", "rope"], energy: 15 },
+        animalTraps: { materials: ["rope", "wood", "bait"], energy: 20 },
+        
+        // 🧥 Clothing & Protection
+        warmClothing: { materials: ["fur", "cloth"], energy: 20 },
+        snowshoes: { materials: ["wood", "rope"], energy: 10 },
+        camouflageGear: { materials: ["cloth", "mud"], energy: 15 },
+        
+        // 🏺 Medicine & Healing
+        herbalTea: { materials: ["herbs", "boiled water"], energy: 5 },
+        bandages: { materials: ["cloth", "herbs"], energy: 5 },
+        antiseptic: { materials: ["alcohol", "herbs"], energy: 10 },
+        painkillers: { materials: ["herbs", "water"], energy: 10 },
+        
+        // ⚒️ Advanced Tools
+        metalTools: { materials: ["metal", "fire", "rope"], energy: 30 },
+        pickaxe: { materials: ["wood", "stone", "rope"], energy: 20 },
+        shovel: { materials: ["wood", "metal"], energy: 15 },
+        compass: { materials: ["metal", "glass", "magnet"], energy: 25 },
+        
+        // 🌊 Water & Filtration
+        waterFilter: { materials: ["charcoal", "cloth", "sand"], energy: 10 },
+        canteen: { materials: ["gourd", "fire"], energy: 10 },
+        
+        // 🔫 Hunting & Combat
+        arrows: { materials: ["wood", "stone"], energy: 10 },
+        bowstring: { materials: ["rope", "gut"], energy: 5 },
+        slingshot: { materials: ["wood", "rope", "stone"], energy: 15 },
+        bola: { materials: ["rope", "stone"], energy: 15 },
+        
+        // 📜 Special & Rare Items
+        hiddenMap: { materials: ["parchment", "ink"], energy: 10 },
+        torch: { materials: ["wood", "cloth", "oil"], energy: 10 },
+        reinforcedArmor: { materials: ["metal", "leather"], energy: 40 },
+        
+        // 🏗️ Construction & Expansion
+        ladder: { materials: ["wood", "rope"], energy: 20 },
+        bridge: { materials: ["wood", "rope"], energy: 50 },
     },
   
     // Get available crafting options based on inventory
@@ -1675,9 +1939,10 @@ document.addEventListener('alpine:init', () => {
     },
   
     // Toggle UI sections
-    toggleStats() { this.showStats = !this.showStats; },
-    toggleInventory() { this.showInventory = !this.showInventory; },
-    toggleConsumption() { this.showConsumption = !this.showConsumption; },
+    toggleStats() { 
+      this.showStats = !this.showStats; 
+      this.showInventory = !this.showInventory;
+    },
     toggleCrafting() { 
       this.showCrafting = !this.showCrafting; 
       Alpine.nextTick(() => this.availableCraftingOptions()); // Force Alpine update
@@ -1996,7 +2261,7 @@ document.addEventListener('alpine:init', () => {
   // Survival Tools
   Alpine.data('survivalTools', () => ({
     status: {
-      currentVersion: "0.0.4",  // Update this every time you release a new version
+      currentVersion: "1.0.0",  // Update this every time you release a new version
       latestVersion: null,
       updateAvailable: false,
   

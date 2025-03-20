@@ -41,12 +41,12 @@
     <!-- Tabs Navigation -->
     <nav class="flex justify-center overflow-x-auto gap-2 pb-2 whitespace-nowrap">
       <div class="flex gap-2 overflow-x-auto max-w-full py-2 mb-2 px-4">
-        <button @click="activeTab = 'training'" :class="{ 'bg-blue-500 text-white': activeTab === 'training' }" class="px-4 py-2 rounded-lg">Training</button>
-        <button @click="activeTab = 'scenarios'" :class="{ 'bg-blue-500 text-white': activeTab === 'scenarios' }" class="px-4 py-2 rounded-lg">Scenarios</button>
-        <button @click="activeTab = 'resourceGame'" :class="{ 'bg-blue-500 text-white': activeTab === 'resourceGame' }" class="px-4 py-2 rounded-lg">Resource Game</button>
-        <button @click="activeTab = 'checklist'" :class="{ 'bg-blue-500 text-white': activeTab === 'checklist' }" class="px-4 py-2 rounded-lg">Checklist</button>
-        <button @click="activeTab = 'tools'" :class="{ 'bg-blue-500 text-white': activeTab === 'tools' }" class="px-4 py-2 rounded-lg">Tools</button>
-        <button @click="activeTab = 'library'" :class="{ 'bg-blue-500 text-white': activeTab === 'library' }" class="px-4 py-2 rounded-lg">Guides</button>
+        <button @click="setActiveTab('training')" :class="{ 'bg-blue-500 text-white': activeTab === 'training' }" class="px-4 py-2 rounded-lg">Training</button>
+        <button @click="setActiveTab('scenarios')" :class="{ 'bg-blue-500 text-white': activeTab === 'scenarios' }" class="px-4 py-2 rounded-lg">Scenarios</button>
+        <button @click="setActiveTab('resourceGame')" :class="{ 'bg-blue-500 text-white': activeTab === 'resourceGame' }" class="px-4 py-2 rounded-lg">Resource Game</button>
+        <button @click="setActiveTab('checklist')" :class="{ 'bg-blue-500 text-white': activeTab === 'checklist' }" class="px-4 py-2 rounded-lg">Checklist</button>
+        <button @click="setActiveTab('tools')" :class="{ 'bg-blue-500 text-white': activeTab === 'tools' }" class="px-4 py-2 rounded-lg">Tools</button>
+        <button @click="setActiveTab('library')" :class="{ 'bg-blue-500 text-white': activeTab === 'library' }" class="px-4 py-2 rounded-lg">Guides</button>
       </div>
     </nav>
 
@@ -147,47 +147,124 @@
     <div x-show="activeTab === 'resourceGame'" x-data="resourceGame" class="bg-gray-800 p-6 rounded-lg shadow-md">
       <h2 class="text-2xl font-light">Survival Game</h2>
     
-      <div class="flex space-x-2 mt-4">
+      <div class="grid grid-cols-2 gap-4 mt-4">
         <button @click="toggleStats()" class="px-4 py-2 bg-gray-500 text-white rounded-lg">Toggle Stats</button>
-        <button @click="toggleInventory()" class="px-4 py-2 bg-blue-500 text-white rounded-lg">Toggle Inventory</button>
-        <button @click="toggleConsumption()" class="px-4 py-2 bg-green-500 text-white rounded-lg">Consume Items</button>
         <button @click="toggleCrafting()" class="px-4 py-2 bg-red-500 text-white rounded-lg">Craft Items</button>
       </div>
+
+      <!-- 📊 Stats Interface -->
+      <div x-show="showStats" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      
+        <!-- 📊 Survival Stats -->
+        <div class="mt-4 bg-gray-700 p-4 rounded-lg h-[400px] sm:h-[450px] overflow-y-auto">
+            <h3 class="text-lg font-light mb-2">📊 Survival Stats</h3>
+            
+            <!-- Top Row: General Stats -->
+            <div class="grid grid-cols-3 gap-2 text-sm text-gray-300">
+                <p>📆 Days: <span x-text="daysSurvived"></span></p>
+                <p>🌦 Weather: <span x-text="weather"></span></p>
+                <p>🍂 Season: <span x-text="season"></span></p>
+            </div>
     
-      <div x-show="showStats" class="mt-4 bg-gray-700 p-4 rounded-lg">
-        <p>Days Survived: <span x-text="daysSurvived"></span></p>
-        <p>Weather: <span x-text="weather"></span></p>
-        <p>Season: <span x-text="season"></span></p>
-        <p>Temperature: <span x-text="temperature"></span>°C</p>
-        <p>Water: <span x-text="resources.water"></span> liters</p>
-        <p>Food: <span x-text="resources.food"></span> kg</p>
-        <p>Health: <span x-text="health"></span>%</p>
-        <p>Energy: <span x-text="energy"></span>%</p>
-        <p>Hunger: <span x-text="hunger"></span>%</p>
-        <p>Thirst: <span x-text="thirst"></span>%</p>
-        <p>Injuries: <span x-text="injury ? injury : 'None'"></span></p>
-        <p>Sickness: <span x-text="sickness ? sickness : 'Healthy'"></span></p>
-        <p>Pet: <span x-text="pet ? 'Yes' : 'No'"></span></p>
-      </div>
+            <!-- Middle Row: Resources -->
+            <div class="grid grid-cols-2 gap-2 text-sm text-gray-300 mt-2">
+                <p>💧 Water: <span x-text="resources.water"></span> L</p>
+                <p>🍖 Food: <span x-text="resources.food"></span> kg</p>
+                <p>🌡 Temp: <span x-text="temperature"></span>°C</p>
+                <p>🐾 Pet: <span x-text="pet ? 'Yes' : 'No'"></span></p>
+            </div>
     
-      <div x-show="showInventory" class="mt-4 bg-gray-700 p-4 rounded-lg">
-        <h3 class="text-lg font-light">Inventory</h3>
-        <p x-text="'Items: ' + (inventory.length > 0 ? inventory.join(', ') : 'None')"></p>
-      </div>
+            <!-- Bars for Health, Energy, Hunger, and Thirst -->
+            <div class="mt-3">
+                <p>❤️ Health</p>
+                <div class="w-full bg-gray-600 rounded h-3">
+                    <div class="bg-green-500 h-3 rounded" :style="'width: ' + Math.min(health, 100) + '%'"></div>
+                </div>
     
-      <div x-show="showConsumption" class="mt-4 bg-gray-700 p-4 rounded-lg">
-        <h3 class="text-lg font-light">Consume Resources</h3>
-        <button @click="consume('food')" class="px-4 py-2 bg-yellow-500 text-white rounded-lg">Eat Food</button>
-        <button @click="consume('water')" class="px-4 py-2 bg-blue-500 text-white rounded-lg">Drink Water</button>
-        <button @click="consume('medicine')" class="px-4 py-2 bg-red-500 text-white rounded-lg">Take Medicine</button>
-      </div>
+                <p class="mt-2">⚡ Energy</p>
+                <div class="w-full bg-gray-600 rounded h-3">
+                    <div class="bg-yellow-400 h-3 rounded" :style="'width: ' + Math.min(energy, 100) + '%'"></div>
+                </div>
     
-      <div x-show="showCrafting" class="mt-4 bg-gray-700 p-4 rounded-lg">
-        <h3 class="text-lg font-light">Crafting Options</h3>
-        <template x-for="(recipe, name) in availableCraftingOptions()" :key="name">
-          <button @click="$data.craft(name)" class="px-4 py-2 bg-orange-500 text-white rounded-lg m-1" x-text="'Craft ' + name + ' (-' + recipe.energy + ' Energy)'">
-          </button>
-        </template>
+                <p class="mt-2">🍽 Hunger <span x-show="hunger >= 80" class="text-red-400">(Starving!)</span></p>
+                <div class="w-full bg-gray-600 rounded h-3">
+                    <div :class="hunger >= 80 ? 'bg-red-600' : 'bg-red-500'" class="h-3 rounded" :style="'width: ' + Math.min(hunger, 100) + '%'"></div>
+                </div>
+    
+                <p class="mt-2">🥤 Thirst <span x-show="thirst >= 80" class="text-red-400">(Dehydrated!)</span></p>
+                <div class="w-full bg-gray-600 rounded h-3">
+                    <div :class="thirst >= 80 ? 'bg-red-600' : 'bg-blue-500'" class="h-3 rounded" :style="'width: ' + Math.min(thirst, 100) + '%'"></div>
+                </div>
+            </div>
+    
+            <!-- Injury & Sickness -->
+            <div class="grid grid-cols-2 gap-2 text-sm text-gray-300 mt-3">
+                <p>🩹 Injury: <span x-text="injury ? injury : 'None'"></span></p>
+                <p>🤒 Sickness: <span x-text="sickness ? sickness : 'Healthy'"></span></p>
+            </div>
+    
+            <!-- 🥩 Consume Resources -->
+            <div class="mt-4">
+                <h3 class="text-lg font-light">🍽 Consume Resources</h3>
+                <div class="flex gap-2 mt-2">
+                    <button @click="consume('food')" class="px-3 py-1 bg-yellow-500 text-white rounded-lg">🍖 Eat</button>
+                    <button @click="consume('water')" class="px-3 py-1 bg-blue-500 text-white rounded-lg">💧 Drink</button>
+                    <button @click="consume('medicine')" class="px-3 py-1 bg-red-500 text-white rounded-lg">💊 Heal</button>
+                </div>
+            </div>
+        </div>
+            
+        <!-- 🎒 Inventory (Now Wraps Text Properly on Mobile) -->
+        <div class="mt-4 bg-gray-700 p-4 rounded-lg h-[400px] sm:h-[450px] overflow-y-auto">
+            <h3 class="text-lg font-light mb-2">🎒 Inventory</h3>
+            <template x-if="inventory.length > 0">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                    <template x-for="(item, index) in inventory" :key="index">
+                        <div class="flex flex-col bg-gray-800 p-2 rounded-md text-center">
+                            <!-- Make Text Wrap Instead of Truncate -->
+                            <span class="text-sm break-words w-full" x-text="item"></span>
+                            <button @click="removeItem(index)" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition mt-1">
+                                ✖
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </template>
+            <p x-show="inventory.length === 0" class="text-gray-400 text-sm">Inventory is empty.</p>
+        </div>
+    </div>
+      
+      <!-- 🛠 Crafting Interface -->
+      <div x-show="showCrafting" class="mt-4 bg-gray-700 p-4 rounded-lg h-[400px] sm:h-[450px] overflow-y-auto">
+          <h3 class="text-lg font-light mb-2">🛠 Crafting Options</h3>
+          
+          <template x-if="Object.keys(availableCraftingOptions()).length > 0">
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  <template x-for="(recipe, name) in availableCraftingOptions()" :key="name">
+                      <div class="flex flex-col items-center bg-gray-800 p-3 rounded-md shadow-md">
+                          <!-- 📌 Item Name -->
+                          <h4 class="text-md font-semibold text-orange-400 capitalize" x-text="name"></h4>
+      
+                          <!-- 🔧 Required Materials -->
+                          <p class="text-xs text-gray-300 mt-1">Requires: 
+                              <span class="text-gray-200" x-text="recipe.materials.join(', ')"></span>
+                          </p>
+      
+                          <!-- ⚡ Energy Cost -->
+                          <p class="text-xs text-yellow-400 mt-1">⚡ -<span x-text="recipe.energy"></span> Energy</p>
+      
+                          <!-- 🎯 Craft Button -->
+                          <button @click="$data.craft(name)" class="mt-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition">
+                              Craft
+                          </button>
+                      </div>
+                  </template>
+              </div>
+          </template>
+          
+          <p x-show="Object.keys(availableCraftingOptions()).length === 0" class="text-gray-400 text-sm text-center">
+              ❌ No craftable items available.
+          </p>
       </div>
     
       <h3 class="text-lg font-light mt-4">Actions:</h3>
