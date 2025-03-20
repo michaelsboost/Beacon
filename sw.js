@@ -5,7 +5,7 @@ const { registerRoute } = workbox.routing;
 const { CacheFirst, NetworkFirst } = workbox.strategies;
 const { clientsClaim, skipWaiting } = workbox.core;
 
-const cacheName = 'Beacon-cache-v0.0.2';  // Change version number when you update
+const cacheName = 'Beacon-cache-v1.0.0';  // Change version number when you update
 
 // Activate new service worker immediately and claim clients
 self.addEventListener('install', (event) => {
