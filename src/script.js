@@ -1959,9 +1959,7 @@ document.addEventListener('alpine:init', () => {
         description: "Assess your shelter, transportation, and financial stability.",
         icon: "🚗",
         items: [
-            { name: "I have a stable full-time income", checked: false },
-            { name: "I have a part-time or irregular income", checked: false },
-            { name: "I am currently unemployed", checked: false },
+            { name: "I have a stable income", checked: false },
             { name: "I have an emergency savings fund (3-6 months of expenses)", checked: false },
             { name: "I have investments (stocks, real estate, crypto, etc.)", checked: false },
             { name: "I have a side hustle or passive income stream", checked: false },
@@ -1969,13 +1967,9 @@ document.addEventListener('alpine:init', () => {
             { name: "I have valuable tradeable assets (gold, silver, bartering items)", checked: false },
             { name: "I have a financial backup plan (loans, family support, credit line)", checked: false },
             { name: "I have a plan for generating income post-collapse (bartering, trading, selling skills)", checked: false },
-            { name: "I have a stable home/apartment", checked: false },
-            { name: "I have temporary housing (staying with family, hotel, shelter)", checked: false },
-            { name: "I am currently homeless", checked: false },
+            { name: "I have a stable shelter", checked: false },
             { name: "I have a bug-out location (cabin, secondary shelter)", checked: false },
             { name: "I have a vehicle for transportation", checked: false },
-            { name: "I rely on public transportation", checked: false },
-            { name: "I have no reliable transportation", checked: false },
             { name: "I have an emergency backup vehicle (bike, motorcycle, etc.)", checked: false },
             { name: "I have a fully stocked bug-out bag ready to go", checked: false },
             { name: "I have an emergency evacuation plan", checked: false }
@@ -2261,7 +2255,7 @@ document.addEventListener('alpine:init', () => {
   // Survival Tools
   Alpine.data('survivalTools', () => ({
     status: {
-      currentVersion: "1.0.0",  // Update this every time you release a new version
+      currentVersion: "1.0.1",  // Update this every time you release a new version
       latestVersion: null,
       updateAvailable: false,
   

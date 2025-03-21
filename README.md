@@ -11,7 +11,7 @@ The **Beacon Survival App** is an **interactive survival training tool** designe
 > This app was developed using **[kodeWeave](https://michaelsboost.com/kodeweave)**, a powerful coding playground that allows developers to write, test, and refine web applications from anywhere.
 
 ### ⚠️ **Project Status**
-> **As of March 19, 2025, this project has been abandoned.**  
+> **As of March 21, 2025, this project has been abandoned.**  
 > **All further updates and contributions are now community-driven.**  
 > **The original developer, Michael Schwartz, is no longer maintaining or updating this repository.**  
 
