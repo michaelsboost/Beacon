@@ -16,11 +16,34 @@ document.addEventListener('alpine:init', () => {
           ]
         }
       }
-    },
+    }, 
     activeTab: loadStateFromLocalStorage('activeTab', 'training'),
     selectedGuide: null,
     searchQuery: '',
-    activeCategory: 'all',
+    activeCategory: 'all', 
+    wakeLock: null,
+    countdownSeconds: 0,
+    async requestWakeLock() {
+      if ('wakeLock' in navigator) {
+        try {
+          this.wakeLock = await navigator.wakeLock.request('screen');
+          console.log('Wake lock is active');
+        } catch (err) {
+          console.error('Wake lock error:', err.name, err.message);
+        }
+      } else {
+        alert('Your browser does not support wake lock. Please keep your screen on manually during training.');
+      }
+    },
+    releaseWakeLock() {
+      if (this.wakeLock !== null) {
+        this.wakeLock.release()
+          .then(() => {
+            console.log('Wake lock released');
+            this.wakeLock = null;
+          });
+      }
+    },
 
     // Filter Guides
     get filteredGuides() {
@@ -38,9 +61,13 @@ document.addEventListener('alpine:init', () => {
     },
 
     // Method to set active tab and store it
-    setActiveTab(tab) {
-        this.activeTab = tab;
-        saveStateToLocalStorage('activeTab', tab);
+    async setActiveTab(tab) {
+      this.releaseWakeLock();
+      this.activeTab = tab;
+      saveStateToLocalStorage('activeTab', tab);
+      if (['training', 'tools'].includes(tab)) {
+        await this.requestWakeLock();
+      }
     },
 
     // Open Guide
@@ -2255,7 +2282,7 @@ document.addEventListener('alpine:init', () => {
   // Survival Tools
   Alpine.data('survivalTools', () => ({
     status: {
-      currentVersion: "1.0.1",  // Update this every time you release a new version
+      currentVersion: "1.0.5",  // Update this every time you release a new version
       latestVersion: null,
       updateAvailable: false,
   
