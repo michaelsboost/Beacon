@@ -1,12 +1,15 @@
 {
-  "theme_color": "#13171f",
-  "background_color": "#13171f",
-  "display": "standalone",
-  "start_url": "./index.html",
-  "lang": "en-US",
+  "id": "com.michaelsboost.beacon",
   "name": "Beacon",
   "short_name": "Beacon",
   "description": "Beacon combines emergency survival tools with skill-building and resource management. Quickly access life-saving features like an SOS signal, compass, pedometer, Morse code translator, and signal mirror, while also tracking your survival training, managing resources, and completing essential checklists. Whether you're in an emergency or sharpening your survival knowledge, Beacon keeps you prepared.",
+  "lang": "en-US",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#13171f",
+  "background_color": "#13171f",
   "icons": [
     {
       "src": "./imgs/logo-192x192.png",
@@ -31,6 +34,24 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    }
+  ],
+  "categories": [
+    "education",
+    "fitness",
+    "games",
+    "lifestyle",
+    "medical",
+    "productivity",
+    "security",
+    "sports",
+    "utilities"
+  ],
+  "prefer_related_applications": true,
+  "related_applications": [
+    {
+      "platform": "play",
+      "id": "com.michaelsboost.beacon"
     }
   ]
 }
