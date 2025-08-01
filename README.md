@@ -1,6 +1,6 @@
 # 📖 Beacon Survival App
 
-![](https://raw.githubusercontent.com/michaelsboost/Beacon/main/imgs/screenshots/1training.png)
+![](https://raw.githubusercontent.com/michaelsboost/Beacon/main/imgs/screenshots/screenshot-training.png)
 
 ## 🌟 Overview
 The **Beacon Survival App** is an **interactive survival training tool** designed to help users build critical survival skills through **guides, training simulations, emergency checklists, and scenario-based challenges**. It includes **real-time progress tracking, skill meters, local storage integration, and an interactive UI** powered by **Alpine.js**.
@@ -11,7 +11,7 @@ The **Beacon Survival App** is an **interactive survival training tool** designe
 > This app was developed using **[kodeWeave](https://michaelsboost.com/kodeweave)**, a powerful coding playground that allows developers to write, test, and refine web applications from anywhere.
 
 ### ⚠️ **Project Status**
-> **As of March 21, 2025, this project has been abandoned.**  
+> **As of August 1st, 2025, this project has been abandoned.**  
 > **All further updates and contributions are now community-driven.**  
 > **The original developer, Michael Schwartz, is no longer maintaining or updating this repository.**  
 
@@ -36,19 +36,6 @@ Access it here: **[Beacon Survival App](https://michaelsboost.com/Beacon/)**
 - Global progress meters determine overall **survival readiness**.
 - Supports **real-time updates & persistent state saving** with LocalStorage.  
 
-### 🌍 **Resource Management Survival Game**
-- **Manage essential survival resources** such as:
-  - **🥩 Food**
-  - **💧 Water**
-  - **⚡ Energy**
-  - **❤️ Health**
-  - **🔥 Temperature**
-- **Day/Night cycle & seasonal weather effects**.
-- **Hunger & thirst mechanics** that require careful resource planning.
-- **Injury & sickness simulation**, requiring medicine and rest to survive.
-- **Exploration, hunting, foraging, and crafting mechanics** to gather new resources.
-- **Dynamic event log** to track in-game survival status.
-
 ### 🎭 **Survival Scenario Simulator**
 - Interactive scenarios with **dynamic challenges**.
 - **Time-based survival mechanics** (e.g., complete objectives before time runs out).
@@ -57,8 +44,12 @@ Access it here: **[Beacon Survival App](https://michaelsboost.com/Beacon/)**
 
 ### 🆘 **Emergency Preparedness Checklist**
 - Covers **shelter, food, finances, transportation, and personal security**.
+- **Responsive UI** optimized for small phones (320px+), tablets, and desktops.
+- **Touch-friendly controls** with large tap targets (44x44px minimum) for mobile usability.
+- **Accessible design** with ARIA attributes, clear focus states, and screen reader support.
 - Readiness level indicators from **Unprepared 🚨 to Ultimate Survivalist 🏆**.
 - **LocalStorage integration** saves checklist states across sessions.
+- **Export options**: Save as JSON or PDF for sharing or printing.
 
 ### **🛠️ Survival Tools**
 Enhance your survival experience with built-in survival tools, including:  
@@ -96,6 +87,8 @@ cd Beacon
 - Alpine.js (lightweight reactive framework)
 - TailwindCSS (for UI styling)
 - Marked.js (for Markdown rendering)
+- jsPDF: For exporting emergency plans as PDFs
+- Service Worker: For PWA offline caching.
 
 ### **3️⃣ Contributing**
 Since the project is now community-driven:
@@ -110,7 +103,7 @@ Since the project is now community-driven:
 This project is licensed under the **MIT License**. You are free to use, modify, and distribute it.
 
 **Originally Developed by:** [Michael Schwartz](https://michaelsboost.com/)  
-**Maintained by:** The Community (as of March 19, 2025)
+**Maintained by:** The Community (as of August 1st, 2025)
 
 ## **☕ Support the Developer**
 If Beacon was helpful for you, consider showing your appreciation in the following ways:

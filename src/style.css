@@ -1,20 +1,6 @@
-/* For WebKit browsers (Chrome, Safari) */
-
-/* ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #3b82f6;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #2464cc;
-} */
-
+/* Custom CSS for Markdown */
 ul p, ul strong {
   display: unset;
-  margin: 0; padding: 0;
+  margin: 0;
+  padding: 0;
 }

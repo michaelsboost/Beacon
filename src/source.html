@@ -1,4 +1,4 @@
-<div class="absolute inset-0 overflow-auto bg-gray-900 text-gray-100 font-sans" x-data="app">
+<div class="bg-gray-900 text-gray-100 font-sans absolute inset-0 overflow-auto" x-data="app">
   <!-- Main Container -->
   <div class="container mx-auto p-4">
     <!-- Header -->
@@ -12,21 +12,19 @@
     <!-- Tabs Navigation -->
     <nav class="flex justify-center overflow-x-auto gap-2 pb-2 whitespace-nowrap">
       <div class="flex gap-2 overflow-x-auto max-w-full py-2 mb-2 px-4">
-        <button @click="setActiveTab('training')" :class="{ 'bg-blue-500 text-white': activeTab === 'training' }" class="px-4 py-2 rounded-lg">Training</button>
-        <button @click="setActiveTab('scenarios')" :class="{ 'bg-blue-500 text-white': activeTab === 'scenarios' }" class="px-4 py-2 rounded-lg">Scenarios</button>
-        <button @click="setActiveTab('resourceGame')" :class="{ 'bg-blue-500 text-white': activeTab === 'resourceGame' }" class="px-4 py-2 rounded-lg">Resource Game</button>
-        <button @click="setActiveTab('checklist')" :class="{ 'bg-blue-500 text-white': activeTab === 'checklist' }" class="px-4 py-2 rounded-lg">Checklist</button>
-        <button @click="setActiveTab('tools')" :class="{ 'bg-blue-500 text-white': activeTab === 'tools' }" class="px-4 py-2 rounded-lg">Tools</button>
-        <button @click="setActiveTab('library')" :class="{ 'bg-blue-500 text-white': activeTab === 'library' }" class="px-4 py-2 rounded-lg">Guides</button>
+        <button @click="setActiveTab('training')" :class="{ 'bg-blue-500 text-white': activeTab === 'training' }" class="px-4 py-2 rounded-lg" aria-label="Training Tab">Training</button>
+        <button @click="setActiveTab('scenarios')" :class="{ 'bg-blue-500 text-white': activeTab === 'scenarios' }" class="px-4 py-2 rounded-lg" aria-label="Scenarios Tab">Scenarios</button>
+        <button @click="setActiveTab('checklist')" :class="{ 'bg-blue-500 text-white': activeTab === 'checklist' }" class="px-4 py-2 rounded-lg" aria-label="Checklist Tab">Checklist</button>
+        <button @click="setActiveTab('tools')" :class="{ 'bg-blue-500 text-white': activeTab === 'tools' }" class="px-4 py-2 rounded-lg" aria-label="Tools Tab">Tools</button>
+        <button @click="setActiveTab('library')" :class="{ 'bg-blue-500 text-white': activeTab === 'library' }" class="px-4 py-2 rounded-lg" aria-label="Guides Tab">Guides</button>
+        <button @click="setActiveTab('plan')" :class="{ 'bg-blue-500 text-white': activeTab === 'plan' }" class="px-4 py-2 rounded-lg" aria-label="Plan Tab">Plan</button>
       </div>
     </nav>
 
     <!-- Training Tab -->
     <div x-show="activeTab === 'training'" x-data="training" class="space-y-6">
-      <!-- Progress Tracker -->
       <div class="bg-gray-800 p-6 rounded-lg shadow-md">
         <h2 class="text-2xl font-semibold mb-4">Overall Progress</h2>
-        
         <span class="text-sm text-gray-400">Skill Level: <span class="font-bold text-white" x-text="overallSkillLevel"></span></span>
         <div class="flex items-center gap-2">
           <div class="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
@@ -35,19 +33,14 @@
           <span class="text-sm text-gray-400" x-text="`${globalProgress}%`"></span>
         </div>
       </div>
-
-      <!-- Skill Tree -->
       <div class="grid gap-4">
         <template x-for="skill in skills" :key="skill.name">
           <div class="bg-gray-800 p-6 rounded-lg shadow-md">
-            <!-- Skill Header -->
-            <div class="flex items-center gap-2 cursor-pointer" @click="toggleSkill(skill)">
+            <div class="flex items-center gap-2 cursor-pointer" @click="toggleSkill(skill)" role="button" :aria-expanded="skill.expanded">
               <span class="text-2xl" x-text="skill.icon"></span>
               <h3 class="text-xl font-semibold" x-text="skill.name"></h3>
               <span class="ml-auto text-gray-400" x-text="skill.expanded ? '▲' : '▼'"></span>
             </div>
-    
-            <!-- Skill Progress -->
             <div class="mt-4">
               <span class="text-sm text-gray-400">Skill Level: <span class="font-bold text-white" x-text="skill.level"></span></span>
               <div class="flex items-center gap-2 mt-2">
@@ -57,22 +50,13 @@
                 <span class="text-sm text-gray-400" x-text="`${getSkillProgress(skill)}%`"></span>
               </div>
             </div>
-    
-            <!-- Skill Challenge -->
             <div class="mt-4" x-show="skill.expanded">
               <p class="text-sm text-gray-400" x-text="skill.challenge ? skill.challenge.text : 'No challenge available'"></p>
-              <button @click="startChallenge(skill)" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                Start Challenge
-              </button>
-    
+              <button @click="startChallenge(skill)" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors" aria-label="Start Challenge">Start Challenge</button>
               <div x-show="skill.challengeActive" class="mt-2">
                 <p class="text-sm text-gray-400">Time Remaining: <span x-text="skill.timeRemaining"></span></p>
-                <button @click="completeChallenge(skill, true)" class="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
-                  Completed
-                </button>
-                <button @click="completeChallenge(skill, false)" class="mt-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-                  Failed
-                </button>
+                <button @click="completeChallenge(skill, true)" class="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors" aria-label="Complete Challenge">Completed</button>
+                <button @click="completeChallenge(skill, false)" class="mt-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors" aria-label="Fail Challenge">Failed</button>
               </div>
             </div>
           </div>
@@ -80,193 +64,30 @@
       </div>
     </div>
 
-    <!-- Survival Scenario Simulator -->
+    <!-- Scenarios Tab -->
     <div x-show="activeTab === 'scenarios'" x-data="scenarioSimulator" class="space-y-6">
-      <h2 class="text-2xl font-light">Survival Scenario Simulator:</h2><br>
-      
-      <!-- 📌 Scenario Selection & Display -->
+      <h2 class="text-2xl font-semibold mb-4">Survival Scenarios</h2>
       <template x-for="scenario in scenarios" :key="scenario.title">
         <div class="bg-gray-800 p-6 rounded-lg shadow-md">
-          <!-- Scenario Button -->
-          <button @click="toggleScenario(scenario)" 
-            class="block w-full text-left text-white font-semibold hover:text-blue-400 transition">
+          <button @click="toggleScenario(scenario)" class="block w-full text-left text-white font-semibold hover:text-blue-400 transition" :aria-expanded="scenario.expanded">
             <span x-text="scenario.title"></span>
           </button>
-    
-          <!-- 📌 Active Scenario Details (Only Shown Inside the Clicked Box) -->
           <div x-show="scenario.expanded" class="mt-4">
-            <p class="mt-2 text-gray-400" x-text="scenario.description"></p>
+            <p class="text-gray-400" x-text="scenario.description"></p>
             <p class="mt-2"><strong>Time Remaining:</strong> <span x-text="scenario.timeRemaining"></span> minutes</p>
             <p class="mt-2"><strong>Current Challenge:</strong> <span x-text="scenario.challenges[scenario.challengeIndex]"></span></p>
-    
-            <!-- Start Scenario Button (Shown Only If Scenario Hasn't Started) -->
-            <button x-show="!scenario.started" @click="startScenario(scenario)" 
-              class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-              Start Scenario
-            </button>
-    
-            <!-- Complete Challenge Button (Only Shown After Clicking Start) -->
-            <button x-show="scenario.started" @click="completeChallenge(scenario)" 
-              class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-              Complete Challenge
-            </button>
-    
+            <button x-show="!scenario.started" @click="startScenario(scenario)" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors" aria-label="Start Scenario">Start Scenario</button>
+            <button x-show="scenario.started" @click="completeChallenge(scenario)" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors" aria-label="Complete Challenge">Complete Challenge</button>
             <p class="mt-2 font-bold text-green-400" x-text="scenario.outcome"></p>
           </div>
         </div>
       </template>
     </div>
-    
-    <!-- Resource Management Mini-Game -->
-    <div x-show="activeTab === 'resourceGame'" x-data="resourceGame" class="bg-gray-800 p-6 rounded-lg shadow-md">
-      <h2 class="text-2xl font-light">Survival Game</h2>
-    
-      <div class="grid grid-cols-2 gap-4 mt-4">
-        <button @click="toggleStats()" class="px-4 py-2 bg-gray-500 text-white rounded-lg">Toggle Stats</button>
-        <button @click="toggleCrafting()" class="px-4 py-2 bg-red-500 text-white rounded-lg">Craft Items</button>
-      </div>
 
-      <!-- 📊 Stats Interface -->
-      <div x-show="showStats" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      
-        <!-- 📊 Survival Stats -->
-        <div class="mt-4 bg-gray-700 p-4 rounded-lg h-[400px] sm:h-[450px] overflow-y-auto">
-            <h3 class="text-lg font-light mb-2">📊 Survival Stats</h3>
-            
-            <!-- Top Row: General Stats -->
-            <div class="grid grid-cols-3 gap-2 text-sm text-gray-300">
-                <p>📆 Days: <span x-text="daysSurvived"></span></p>
-                <p>🌦 Weather: <span x-text="weather"></span></p>
-                <p>🍂 Season: <span x-text="season"></span></p>
-            </div>
-    
-            <!-- Middle Row: Resources -->
-            <div class="grid grid-cols-2 gap-2 text-sm text-gray-300 mt-2">
-                <p>💧 Water: <span x-text="resources.water"></span> L</p>
-                <p>🍖 Food: <span x-text="resources.food"></span> kg</p>
-                <p>🌡 Temp: <span x-text="temperature"></span>°C</p>
-                <p>🐾 Pet: <span x-text="pet ? 'Yes' : 'No'"></span></p>
-            </div>
-    
-            <!-- Bars for Health, Energy, Hunger, and Thirst -->
-            <div class="mt-3">
-                <p>❤️ Health</p>
-                <div class="w-full bg-gray-600 rounded h-3">
-                    <div class="bg-green-500 h-3 rounded" :style="'width: ' + Math.min(health, 100) + '%'"></div>
-                </div>
-    
-                <p class="mt-2">⚡ Energy</p>
-                <div class="w-full bg-gray-600 rounded h-3">
-                    <div class="bg-yellow-400 h-3 rounded" :style="'width: ' + Math.min(energy, 100) + '%'"></div>
-                </div>
-    
-                <p class="mt-2">🍽 Hunger <span x-show="hunger >= 80" class="text-red-400">(Starving!)</span></p>
-                <div class="w-full bg-gray-600 rounded h-3">
-                    <div :class="hunger >= 80 ? 'bg-red-600' : 'bg-red-500'" class="h-3 rounded" 
-                         :style="'width: ' + Math.min(hunger, 100) + '%'"></div>
-                </div>
-    
-                <p class="mt-2">🥤 Thirst <span x-show="thirst >= 80" class="text-red-400">(Dehydrated!)</span></p>
-                <div class="w-full bg-gray-600 rounded h-3">
-                    <div :class="thirst >= 80 ? 'bg-red-600' : 'bg-blue-500'" class="h-3 rounded" 
-                         :style="'width: ' + Math.min(thirst, 100) + '%'"></div>
-                </div>
-            </div>
-    
-            <!-- Injury & Sickness -->
-            <div class="grid grid-cols-2 gap-2 text-sm text-gray-300 mt-3">
-                <p>🩹 Injury: <span x-text="injury ? injury : 'None'"></span></p>
-                <p>🤒 Sickness: <span x-text="sickness ? sickness : 'Healthy'"></span></p>
-            </div>
-    
-            <!-- 🥩 Consume Resources -->
-            <div class="mt-4">
-                <h3 class="text-lg font-light">🍽 Consume Resources</h3>
-                <div class="flex gap-2 mt-2">
-                    <button @click="consume('food')" class="px-3 py-1 bg-yellow-500 text-white rounded-lg">🍖 Eat</button>
-                    <button @click="consume('water')" class="px-3 py-1 bg-blue-500 text-white rounded-lg">💧 Drink</button>
-                    <button @click="consume('medicine')" class="px-3 py-1 bg-red-500 text-white rounded-lg">💊 Heal</button>
-                </div>
-            </div>
-        </div>
-            
-        <!-- 🎒 Inventory (Now Wraps Text Properly on Mobile) -->
-        <div class="mt-4 bg-gray-700 p-4 rounded-lg h-[400px] sm:h-[450px] overflow-y-auto">
-            <h3 class="text-lg font-light mb-2">🎒 Inventory</h3>
-            <template x-if="inventory.length > 0">
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                    <template x-for="(item, index) in inventory" :key="index">
-                        <div class="flex flex-col bg-gray-800 p-2 rounded-md text-center">
-                            <!-- Make Text Wrap Instead of Truncate -->
-                            <span class="text-sm break-words w-full" x-text="item"></span>
-                            <button 
-                                @click="removeItem(index)" 
-                                class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition mt-1">
-                                ✖
-                            </button>
-                        </div>
-                    </template>
-                </div>
-            </template>
-            <p x-show="inventory.length === 0" class="text-gray-400 text-sm">Inventory is empty.</p>
-        </div>
-    </div>
-      
-      <!-- 🛠 Crafting Interface -->
-      <div x-show="showCrafting" class="mt-4 bg-gray-700 p-4 rounded-lg h-[400px] sm:h-[450px] overflow-y-auto">
-          <h3 class="text-lg font-light mb-2">🛠 Crafting Options</h3>
-          
-          <template x-if="Object.keys(availableCraftingOptions()).length > 0">
-              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  <template x-for="(recipe, name) in availableCraftingOptions()" :key="name">
-                      <div class="flex flex-col items-center bg-gray-800 p-3 rounded-md shadow-md">
-                          <!-- 📌 Item Name -->
-                          <h4 class="text-md font-semibold text-orange-400 capitalize" x-text="name"></h4>
-      
-                          <!-- 🔧 Required Materials -->
-                          <p class="text-xs text-gray-300 mt-1">Requires: 
-                              <span class="text-gray-200" x-text="recipe.materials.join(', ')"></span>
-                          </p>
-      
-                          <!-- ⚡ Energy Cost -->
-                          <p class="text-xs text-yellow-400 mt-1">⚡ -<span x-text="recipe.energy"></span> Energy</p>
-      
-                          <!-- 🎯 Craft Button -->
-                          <button 
-                              @click="$data.craft(name)" 
-                              class="mt-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition">
-                              Craft
-                          </button>
-                      </div>
-                  </template>
-              </div>
-          </template>
-          
-          <p x-show="Object.keys(availableCraftingOptions()).length === 0" class="text-gray-400 text-sm text-center">
-              ❌ No craftable items available.
-          </p>
-      </div>
-    
-      <h3 class="text-lg font-light mt-4">Actions:</h3>
-      <div class="grid grid-cols-2 gap-4">
-        <button @click="forageFood()" class="px-4 py-2 bg-green-500 text-white rounded-lg">Forage (-10 Energy, +Food)</button>
-        <button @click="collectWater()" class="px-4 py-2 bg-blue-500 text-white rounded-lg">Collect Water (-8 Energy, +Water)</button>
-        <button @click="hunt()" class="px-4 py-2 bg-yellow-500 text-white rounded-lg">Hunt (-15 Energy, Injury Risk, +Food)</button>
-        <button @click="explore()" class="px-4 py-2 bg-purple-500 text-white rounded-lg">Explore (-10 Energy, Find Loot)</button>
-        <button @click="trade()" class="px-4 py-2 bg-indigo-500 text-white rounded-lg">Trade Items</button>
-        <button @click="rest()" class="px-4 py-2 bg-gray-500 text-white rounded-lg">Rest (+30 Energy, +Health)</button>
-      </div>
-    
-      <p class="mt-4 font-bold text-red-500" x-text="alertMessage"></p>
-      <p class="mt-4" x-text="eventLog"></p>
-    </div>
-    
-    <!-- Emergency Preparedness Checklist -->
+    <!-- Checklist Tab -->
     <div x-show="activeTab === 'checklist'" x-data="emergencyChecklist" class="space-y-6">
-      <!-- Global Readiness Progress -->
       <div class="bg-gray-800 p-6 rounded-lg shadow-md">
         <h2 class="text-2xl font-semibold mb-4">Overall Readiness</h2>
-        
         <span class="text-sm text-gray-400">Survival Level: <span class="font-bold text-white" x-text="globalReadinessLevel"></span></span>
         <div class="flex items-center gap-2">
           <div class="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
@@ -275,19 +96,14 @@
           <span class="text-sm text-gray-400" x-text="`${globalReadinessPercentage}%`"></span>
         </div>
       </div>
-      
-      <!-- Survival Checklist Categories -->
-      <div class="grid gap-4 mt-6">
+      <div class="grid gap-4">
         <template x-for="category in categories" :key="category.name">
           <div class="bg-gray-800 p-6 rounded-lg shadow-md">
-            <!-- Category Header -->
-            <div class="flex items-center gap-2 cursor-pointer" @click="toggleCategory(category)">
+            <div class="flex items-center gap-2 cursor-pointer" @click="toggleCategory(category)" role="button" :aria-expanded="category.expanded">
               <span class="text-2xl" x-text="category.icon"></span>
               <h3 class="text-xl font-semibold" x-text="category.name"></h3>
               <span class="ml-auto text-gray-400" x-text="category.expanded ? '▲' : '▼'"></span>
             </div>
-      
-            <!-- Category Readiness Progress -->
             <div class="mt-4">
               <span class="text-sm text-gray-400">Readiness Level: <span class="font-bold text-white" x-text="getCategoryReadinessLevel(category.name)"></span></span>
               <div class="flex items-center gap-2 mt-2">
@@ -297,18 +113,11 @@
                 <span class="text-sm text-gray-400" x-text="`${getCategoryPercentage(category.name)}%`"></span>
               </div>
             </div>
-      
-            <!-- Category Items (Expandable) -->
             <div class="mt-4" x-show="category.expanded">
               <template x-for="(item, index) in category.items" :key="item.name">
                 <label class="block cursor-pointer flex items-center gap-2 mt-2">
-                  <input 
-                    type="checkbox" 
-                    class="form-checkbox text-blue-500"
-                    :id="`${category.name}-${index}`" 
-                    x-model="item.checked" 
-                    @change="toggleItem(item)">
-                  <span class="text-white" x-text="`${item.name}`"></span>
+                  <input type="checkbox" class="form-checkbox text-blue-500" :id="`${category.name}-${index}`" x-model="item.checked" @change="toggleItem(item)" :aria-label="item.name">
+                  <span class="text-white" x-text="item.name"></span>
                 </label>
               </template>
             </div>
@@ -318,192 +127,397 @@
     </div>
 
     <!-- Tools Tab -->
-    <div x-show="activeTab === 'tools'" class="container grid grid-cols-2 gap-4" x-data="survivalTools">
-      <!-- Backup & Restore Data -->
-      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2">
+    <div x-show="activeTab === 'tools'" x-data="survivalTools" class="container grid grid-cols-1 md:grid-cols-2 gap-4">
+      <article class="bg-gray-800 p-6 rounded-lg shadow-md flex flex-col justify-center items-center col-span-1 md:col-span-2">
         <h2 class="text-xl font-semibold text-white">Beacon v<span x-text="status.currentVersion"></span></h2>
-  
-        <button x-show="status.updateAvailable" 
-                @click="status.updatePWA()"
-                class="mt-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
-          Update Beacon
-        </button>
-
-        <div class="grid grid-cols-2 gap-4">
-          <button @click="status.exportAppData()" 
-              class="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
-              Export Data
-          </button>
-      
-          <label class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition cursor-pointer">
-              Import Data
-              <input type="file" accept=".json" class="hidden" @change="status.importAppData(event)">
+        <button x-show="status.updateAvailable" @click="status.updatePWA()" class="mt-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition" aria-label="Update Beacon">Update Beacon</button>
+        <div class="grid grid-cols-2 gap-4 mt-4">
+          <button @click="status.exportAppData()" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition" aria-label="Export Data">Export Data</button>
+          <label class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition cursor-pointer">
+            Import Data
+            <input type="file" accept=".json" class="hidden" @change="status.importAppData(event)" aria-label="Import Data">
           </label>
         </div>
       </article>
-
-      <!-- SOS Signal -->
-      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center"
-               x-data="{ playing: false }">
-        <button class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                @click="playing = !playing; playing ? $refs.sos.play() : ($refs.sos.pause(), $refs.sos.currentTime = 0);"
-                x-text="playing ? 'STOP SOS' : 'SOS'">
+      <article class="bg-gray-800 p-6 rounded-lg shadow-md flex flex-col justify-center items-center" x-data="{ playing: false }">
+        <button class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors" @click="playing = !playing; playing ? $refs.sos.play() : ($refs.sos.pause(), $refs.sos.currentTime = 0)" x-text="playing ? 'STOP SOS' : 'SOS'" aria-label="Toggle SOS Signal">
           <audio x-ref="sos">
             <source src="https://cdn.pixabay.com/audio/2022/03/10/audio_dfb929b28d.mp3" type="audio/mpeg" />
           </audio>
         </button>
       </article>
-
-      <!-- Signal Mirror -->
-      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center">
-        <button class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                @click="signalMirror.flashing = !signalMirror.flashing; signalMirror.flashScreen();">
-          <span x-text="signalMirror.flashing ? 'STOP Flash' : 'Signal Mirror'"></span>
-        </button>
+      <article class="bg-gray-800 p-6 rounded-lg shadow-md flex flex-col justify-center items-center">
+        <button class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors" @click="signalMirror.flashing = !signalMirror.flashing; signalMirror.flashScreen()" x-text="signalMirror.flashing ? 'STOP Flash' : 'Signal Mirror'" aria-label="Toggle Signal Mirror"></button>
       </article>
-
-      <!-- Compass -->
-      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center" x-data="survivalTools.compass" x-init="initCompass()">
+      <article class="bg-gray-800 p-6 rounded-lg shadow-md flex flex-col justify-center items-center" x-data="survivalTools.compass" x-init="initCompass()">
         <span x-text="compass.heading"></span>
         <svg class="w-full my-4" viewBox="0 0 512 512">
-          <path d="M 255.5 0.024 C 255.06 0.105 254.62 0.228 254.221 0.341 L 253.903 0.341 C 115.633 1.702 3.354 113.11 0.632 251.054 L 0.632 251.371 C -0.728 254.201 -0.728 257.495 0.632 260.325 L 0.632 260.653 C 3.027 399.742 116.799 512 256.462 512 L 259.02 512 C 398.365 510.598 511.248 397.511 512.291 258.084 C 512.371 257.449 512.371 256.806 512.291 256.17 L 512.291 254.891 C 512.331 254.466 512.331 254.038 512.291 253.612 C 510.93 114.39 397.966 1.538 258.703 0.341 C 257.661 0.055 256.578 -0.052 255.5 0.024 Z M 244.315 21.114 C 244.949 21.073 245.594 21.155 246.229 21.114 L 246.229 31.04 C 246.188 34.724 248.111 38.152 251.304 40.035 C 254.507 41.877 258.416 41.877 261.619 40.035 C 264.812 38.152 266.736 34.714 266.695 31.04 L 266.695 21.124 C 388.654 26.333 486.299 123.978 491.508 245.937 L 479.678 245.937 C 474.04 246.449 469.875 251.494 470.397 257.132 C 470.919 262.761 475.953 266.925 481.592 266.404 L 491.508 266.404 C 486.299 388.363 388.654 486.008 266.695 491.216 L 266.695 481.3 C 266.799 478.357 265.63 475.51 263.487 473.49 C 261.343 471.47 258.432 470.471 255.5 470.75 C 255.06 470.832 254.62 470.955 254.221 471.067 C 249.461 472.142 246.118 476.422 246.229 481.3 L 246.229 491.216 C 124.269 486.008 26.624 388.363 21.416 266.404 L 31.332 266.404 C 35.016 266.444 38.444 264.521 40.327 261.328 C 42.165 258.135 42.165 254.205 40.327 251.013 C 38.444 247.82 35.005 245.896 31.332 245.937 L 21.416 245.937 C 26.573 124.623 123.236 27.244 244.315 21.124 L 244.315 21.114 Z" fill="currentColor"/>
+          <path d="M255.5 0.024C255.06 0.105 254.62 0.228 254.221 0.341L253.903 0.341C115.633 1.702 3.354 113.11 0.632 251.054L0.632 251.371C-0.728 254.201 -0.728 257.495 0.632 260.325L0.632 260.653C3.027 399.742 116.799 512 256.462 512L259.02 512C398.365 510.598 511.248 397.511 512.291 258.084C512.371 257.449 512.371 256.806 512.291 256.17L512.291 254.891C512.331 254.466 512.331 254.038 512.291 253.612C510.93 114.39 397.966 1.538 258.703 0.341C257.661 0.055 256.578 -0.052 255.5 0.024ZM244.315 21.114C244.949 21.073 245.594 21.155 246.229 21.114L246.229 31.04C246.188 34.724 248.111 38.152 251.304 40.035C254.507 41.877 258.416 41.877 261.619 40.035C264.812 38.152 266.736 34.714 266.695 31.04L266.695 21.124C388.654 26.333 486.299 123.978 491.508 245.937L479.678 245.937C474.04 246.449 469.875 251.494 470.397 257.132C470.919 262.761 475.953 266.925 481.592 266.404L491.508 266.404C486.299 388.363 388.654 486.008 266.695 491.216L266.695 481.3C266.799 478.357 265.63 475.51 263.487 473.49C261.343 471.47 258.432 470.471 255.5 470.75C255.06 470.832 254.62 470.955 254.221 471.067C249.461 472.142 246.118 476.422 246.229 481.3L246.229 491.216C124.269 486.008 26.624 388.363 21.416 266.404L31.332 266.404C35.016 266.444 38.444 264.521 40.327 261.328C42.165 258.135 42.165 254.205 40.327 251.013C38.444 247.82 35.005 245.896 31.332 245.937L21.416 245.937C26.573 124.623 123.236 27.244 244.315 21.124L244.315 21.114Z" fill="currentColor"/>
           <g x-ref="compassArrow" style="transform-origin: center;">
-            <path d="M 248.445 67.683 C 248.279 67.978 248.129 68.282 247.997 68.594 C 247.526 69.592 247.22 70.66 247.092 71.756 L 210.24 254.254 C 210.013 255.45 210.013 256.677 210.24 257.872 L 246.875 440.559 C 247.687 445.167 251.69 448.526 256.369 448.526 C 261.048 448.526 265.051 445.166 265.862 440.559 L 302.498 257.858 C 302.724 256.663 302.724 255.435 302.498 254.24 L 265.638 71.749 C 264.964 68.179 262.335 65.294 258.844 64.29 C 255.352 63.287 251.593 64.336 249.126 67.002 L 248.453 67.675 L 248.445 67.683 Z M 229.683 256.056 L 283.048 256.049 L 256.362 389.465 L 229.683 256.056 Z" fill="currentColor"/>
+            <path d="M248.445 67.683C248.279 67.978 248.129 68.282 247.997 68.594C247.526 69.592 247.22 70.66 247.092 71.756L210.24 254.254C210.013 255.45 210.013 256.677 210.24 257.872L246.875 440.559C247.687 445.167 251.69 448.526 256.369 448.526C261.048 448.526 265.051 445.166 265.862 440.559L302.498 257.858C302.724 256.663 302.724 255.435 302.498 254.24L265.638 71.749C264.964 68.179 262.335 65.294 258.844 64.29C255.352 63.287 251.593 64.336 249.126 67.002L248.453 67.675L248.445 67.683ZM229.683 256.056L283.048 256.049L256.362 389.465L229.683 256.056Z" fill="currentColor"/>
           </g>
         </svg>
       </article>
-
-      <!-- Pedometer -->
-      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center" x-data="survivalTools.pedometer" x-init="pedometer.init()">
-        <p>Steps Taken: <span x-text="pedometer.steps"></span></p>
-        <p>Estimated Distance: <span x-text="(pedometer.steps * pedometer.stepLength).toFixed(2)"></span> meters</p>
-        <button @click="pedometer.reset()" class="w-full mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">Reset</button>
+      <article class="bg-gray-800 p-6 rounded-lg shadow-md flex flex-col justify-center items-center" x-data="survivalTools.pedometer" x-init="init()">
+        <p>Steps Taken: <span x-text="steps"></span></p>
+        <p>Estimated Distance: <span x-text="(steps * stepLength).toFixed(2)"></span> meters</p>
+        <button @click="reset()" class="w-full mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors" aria-label="Reset Pedometer">Reset</button>
       </article>
-
-      <!-- Morse Code Translator -->
-      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2">
+      <article class="bg-gray-800 p-6 rounded-lg shadow-md flex flex-col justify-center items-center col-span-1 md:col-span-2">
         <span class="text-2xl mb-4">Morse Code</span>
         <fieldset class="flex w-full gap-0">
-          <input x-model="morseCode.textInput" @input="morseCode.updateMorse()" type="text" placeholder="Enter text..." class="w-full px-4 py-2 bg-gray-700 text-white rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <button @click="morseCode.playMorseCode()" class="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600 transition-colors" x-text="morseCode.playing ? 'Stop' : 'Play'">Play</button>
+          <input x-model="morseCode.textInput" @input="morseCode.updateMorse()" type="text" placeholder="Enter text..." class="w-full px-4 py-2 bg-gray-700 text-white rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Morse Code Input">
+          <button @click="morseCode.playMorseCode()" class="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600 transition-colors" x-text="morseCode.playing ? 'Stop' : 'Play'" aria-label="Play Morse Code"></button>
         </fieldset>
         <p x-text="morseCode.morseOutput" class="text-lg mt-2"></p>
       </article>
-
-      <!-- Level Tool -->
-      <article class="bg-gray-800 p-6 h-48 rounded-lg shadow-md flex flex-col justify-center items-center col-span-2"x-data="survivalTools.levelTool" x-init="levelTool.init()">
+      <article class="bg-gray-800 p-6 rounded-lg shadow-md flex flex-col justify-center items-center col-span-1 md:col-span-2" x-data="survivalTools.levelTool" x-init="init()">
         <span class="text-2xl mb-4">Level Tool</span>
         <div class="relative w-full h-40 border-4 border-gray-700 rounded-full flex justify-center items-center overflow-hidden bg-gray-200">
-          <div class="absolute w-8 h-8 bg-green-500 rounded-full transition-transform" :style="'transform: ' + levelTool.bubbleX() + ' ' + levelTool.bubbleY()"></div>
+          <div class="absolute w-8 h-8 bg-green-500 rounded-full transition-transform" :style="'transform: ' + bubbleX + ' ' + bubbleY"></div>
         </div>
         <p class="mt-4 text-sm">Tilt your device to see the bubble move.</p>
       </article>
     </div>
 
-    <!-- Survival Library -->
+    <!-- Guides Tab -->
     <div x-show="activeTab === 'library'" x-data="library" class="space-y-6">
-    
-        <!-- 📊 Global Survival Readiness Tracker -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-md">
-            <h2 class="text-2xl font-semibold mb-4">Survival Readiness Progress</h2>
-    
-            <span class="text-sm text-gray-400">
-                Guides Completed: <span class="font-bold text-white" x-text="completedGuides"></span> / 
-                <span x-text="totalGuides"></span>
-            </span>
-    
-            <div class="flex items-center gap-2 mt-2">
-                <div class="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
-                    <div class="h-full bg-blue-500 transition-all" :style="`width: ${libraryProgress}%`"></div>
+      <div class="bg-gray-800 p-6 rounded-lg shadow-md">
+        <h2 class="text-2xl font-semibold mb-4">Survival Readiness Progress</h2>
+        <span class="text-sm text-gray-400">Guides Completed: <span class="font-bold text-white" x-text="completedGuides"></span> / <span x-text="totalGuides"></span></span>
+        <div class="flex items-center gap-2 mt-2">
+          <div class="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
+            <div class="h-full bg-blue-500 transition-all" :style="`width: ${libraryProgress}%`"></div>
+          </div>
+          <span class="text-sm text-gray-400" x-text="`${libraryProgress}%`"></span>
+        </div>
+        <h3 class="mt-2 text-lg text-white">Readiness Level: <span class="font-bold text-blue-400" x-text="globalReadinessLevel"></span></h3>
+      </div>
+      <div class="mb-4">
+        <input x-model="searchQuery" type="text" placeholder="Search guides..." class="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Search Guides">
+      </div>
+      <div class="flex overflow-x-auto gap-2 pb-2 whitespace-nowrap">
+        <template x-for="category in categories" :key="category.key">
+          <button @click="activeCategory = category.key" :class="{ 'bg-blue-500 text-white': activeCategory === category.key }" class="px-4 py-2 rounded-lg transition" :aria-label="`Filter by ${category.name}`">
+            <span x-text="category.name"></span>
+            <span class="ml-2 text-xs text-gray-300" x-text="`(${getCategoryPercentage(category.key)}%)`"></span>
+          </button>
+        </template>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <template x-for="guide in filteredGuides" :key="guide.title">
+          <div class="p-4 bg-gray-700 rounded-lg shadow-md">
+            <h3 class="font-semibold text-lg text-white" x-text="guide.title"></h3>
+            <p class="text-gray-400 mt-2" x-text="guide.description"></p>
+            <div class="mt-4 flex justify-between items-center">
+              <button @click="toggleGuide(guide)" class="px-3 py-1 bg-blue-500 text-white rounded-lg" :aria-expanded="guide.expanded" :aria-label="`Toggle ${guide.title} Details`">
+                <span x-text="guide.expanded ? 'Hide Details' : 'View Guide'"></span>
+              </button>
+              <label class="flex items-center cursor-pointer">
+                <input type="checkbox" class="hidden" @change="toggleGuideCompletion(guide)" :checked="guide.completed" :aria-label="`Mark ${guide.title} as Completed`">
+                <div class="relative w-10 h-5 rounded-full transition-all" :class="guide.completed ? 'bg-green-500' : 'bg-gray-500'">
+                  <div class="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-all" :class="{'translate-x-5': guide.completed}"></div>
                 </div>
-                <span class="text-sm text-gray-400" x-text="`${libraryProgress}%`"></span>
+                <span class="ml-2 text-sm" :class="guide.completed ? 'text-green-400' : 'text-gray-300'" x-text="guide.completed ? 'Completed' : 'Incomplete'"></span>
+              </label>
             </div>
-    
-            <h3 class="mt-2 text-lg text-white">Readiness Level: 
-                <span class="font-bold text-blue-400" x-text="globalReadinessLevel"></span>
-            </h3>
+            <div x-show="guide.expanded" class="mt-4 p-4 bg-gray-800 rounded-lg">
+              <h4 class="text-md font-semibold text-white">Materials Needed:</h4>
+              <ul class="list-disc list-inside text-gray-300">
+                <template x-for="material in guide.materials">
+                  <li x-text="material"></li>
+                </template>
+              </ul>
+              <h4 class="text-md font-semibold text-white mt-2">Steps:</h4>
+              <div class="list-decimal list-inside text-gray-300">
+                <template x-for="step in guide.steps">
+                  <div x-html="markdownToHTML(step)"></div>
+                </template>
+              </div>
+              <h4 class="text-md font-semibold text-white mt-2">Tips:</h4>
+              <ul class="list-disc list-inside text-gray-300">
+                <template x-for="tip in guide.tips">
+                  <li x-html="markdownToHTML(tip)"></li>
+                </template>
+              </ul>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- Emergency Plan Tab -->
+    <div x-show="activeTab === 'plan'" x-data="emergencyPlan" class="p-2 sm:p-4 max-w-4xl mx-auto space-y-4 sm:space-y-6">
+      <h2 class="text-xl sm:text-2xl font-semibold mb-2 sm:mb-4">Emergency Preparedness Plan</h2>
+      <div class="bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md">
+        <h3 class="text-lg sm:text-xl font-semibold mb-2 sm:mb-4">Create Your Comprehensive Plan</h3>
+        <p class="text-gray-400 text-sm sm:text-base mb-4">Build a detailed emergency plan for you and your family.</p>
+
+        <!-- Core Identity and Safety -->
+        <div class="mb-4 sm:mb-6 border-b border-gray-700 pb-4">
+          <div class="flex items-center gap-2 cursor-pointer py-2" @click="sections.coreIdentity = !sections.coreIdentity" role="button" :aria-expanded="sections.coreIdentity">
+            <h4 class="text-base sm:text-lg font-semibold">🛡️ Core Identity and Safety</h4>
+            <span class="ml-auto text-gray-400" x-text="sections.coreIdentity ? '▲' : '▼'"></span>
+          </div>
+          <div x-show="sections.coreIdentity" class="mt-4 space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1" for="safeWord">Family/Household Safe Word</label>
+              <input x-model="plan.coreIdentity.safeWord" type="text" id="safeWord" placeholder="Safe word" class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" aria-label="Safe Word">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="primaryMeetup">Primary Meet-up Location</label>
+              <input x-model="plan.coreIdentity.primaryMeetup" type="text" id="primaryMeetup" placeholder="e.g., Neighbor's house" class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" aria-label="Primary Meet-up Location">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="backupMeetup">Backup Meet-up Location</label>
+              <input x-model="plan.coreIdentity.backupMeetup" type="text" id="backupMeetup" placeholder="e.g., City hall" class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" aria-label="Backup Meet-up Location">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Emergency Contacts</label>
+              <div class="space-y-2 sm:space-y-4 mt-2">
+                <template x-for="(contact, index) in plan.coreIdentity.contacts" :key="index">
+                  <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                    <input x-model="contact.name" type="text" placeholder="Name" class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" :aria-label="'Contact Name ' + index">
+                    <input x-model="contact.phone" type="tel" placeholder="Phone" class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" :aria-label="'Contact Phone ' + index">
+                    <input x-model="contact.role" type="text" placeholder="Role" class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" :aria-label="'Contact Role ' + index">
+                    <button @click="removeContact(index)" class="mt-2 sm:mt-0 px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors cursor-pointer w-full sm:w-auto" :disabled="plan.coreIdentity.contacts.length <= 1" :aria-label="'Remove Contact ' + index">Remove</button>
+                  </div>
+                </template>
+                <button @click="addContact()" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors w-full sm:w-auto text-sm sm:text-base" aria-label="Add Contact">Add Contact</button>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">ID Information for Family Members</label>
+              <div class="space-y-2 sm:space-y-4 mt-2">
+                <template x-for="(member, index) in plan.coreIdentity.familyMembers" :key="index">
+                  <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                    <input x-model="member.name" type="text" placeholder="Name" class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" :aria-label="'Family Member Name ' + index">
+                    <input x-model="member.birthday" type="text" placeholder="Birthday" class="w-full sm:w-32 p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" :aria-label="'Family Member Birthday ' + index">
+                    <input x-model="member.allergies" type="text" placeholder="Allergies" class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" :aria-label="'Family Member Allergies ' + index">
+                    <input x-model="member.medications" type="text" placeholder="Medications" class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" :aria-label="'Family Member Medications ' + index">
+                    <input x-model="member.bloodType" type="text" placeholder="Blood Type" class="w-full sm:w-24 p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" :aria-label="'Family Member Blood Type ' + index">
+                    <button @click="removeFamilyMember(index)" class="mt-2 sm:mt-0 px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors cursor-pointer w-full sm:w-auto" :disabled="plan.coreIdentity.familyMembers.length <= 1" :aria-label="'Remove Family Member ' + index">Remove</button>
+                  </div>
+                </template>
+                <button @click="addFamilyMember()" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors w-full sm:w-auto text-sm sm:text-base" aria-label="Add Family Member">Add Family Member</button>
+              </div>
+            </div>
+          </div>
         </div>
-    
-        <!-- 🔎 Search Bar -->
-        <div class="mb-4">
-            <input x-model="searchQuery" type="text" placeholder="Search guides..." 
-                   class="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+        <!-- Scenario-Specific Response Plans -->
+        <div class="mb-4 sm:mb-6 border-b border-gray-700 pb-4">
+          <div class="flex items-center gap-2 cursor-pointer py-2" @click="sections.scenarios = !sections.scenarios" role="button" :aria-expanded="sections.scenarios">
+            <h4 class="text-base sm:text-lg font-semibold">🔥 Scenario-Specific Response Plans</h4>
+            <span class="ml-auto text-gray-400" x-text="sections.scenarios ? '▲' : '▼'"></span>
+          </div>
+          <div x-show="sections.scenarios" class="mt-4 space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1" for="fireEscape">Fire Escape Plan</label>
+              <textarea x-model="plan.scenarios.fireEscape" id="fireEscape" placeholder="Exits, extinguisher locations..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Fire Escape Plan"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="powerOutage">Power Outage Plan</label>
+              <textarea x-model="plan.scenarios.powerOutage" id="powerOutage" placeholder="Flashlights, food plan..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Power Outage Plan"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="medicalEmergency">Medical Emergency Plan</label>
+              <textarea x-model="plan.scenarios.medicalEmergency" id="medicalEmergency" placeholder="CPR, first aid, 911..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Medical Emergency Plan"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="intruder">Home Intruder Plan</label>
+              <textarea x-model="plan.scenarios.intruder" id="intruder" placeholder="Hide, secure room, 911..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Home Intruder Plan"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="severeWeather">Severe Weather Plans</label>
+              <textarea x-model="plan.scenarios.severeWeather" id="severeWeather" placeholder="Tornado, hurricane plans..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Severe Weather Plans"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="evacuation">Evacuation Plan</label>
+              <textarea x-model="plan.scenarios.evacuation" id="evacuation" placeholder="Go bag, transport..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Evacuation Plan"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="civilUnrest">Civil Unrest Plan</label>
+              <textarea x-model="plan.scenarios.civilUnrest" id="civilUnrest" placeholder="Safe places, bug-out..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Civil Unrest Plan"></textarea>
+            </div>
+          </div>
         </div>
-    
-        <!-- 🏷️ Dynamic Category Tabs -->
-        <div class="flex overflow-x-auto gap-2 pb-2 whitespace-nowrap">
-            <template x-for="category in categories" :key="category.key">
-                <button @click="activeCategory = category.key" 
-                        :class="{ 'bg-blue-500 text-white': activeCategory === category.key }" 
-                        class="px-4 py-2 rounded-lg transition">
-                    <span x-text="category.name"></span>
-                    <span class="ml-2 text-xs text-gray-300" x-text="`(${getCategoryPercentage(category.key)}%)`"></span>
-                </button>
-            </template>
-        </div>
-    
-        <!-- 📚 Guide List -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <template x-for="guide in filteredGuides" :key="guide.title">
-                <div class="p-4 bg-gray-700 rounded-lg shadow-md">
-                    <h3 class="font-semibold text-lg text-white" x-text="guide.title"></h3>
-                    <p class="text-gray-400 mt-2" x-text="guide.description"></p>
-    
-                    <div class="mt-4 flex justify-between items-center">
-                        <!-- 📖 Expand Guide -->
-                        <button @click="toggleGuide(guide)" class="px-3 py-1 bg-blue-500 text-white rounded-lg">
-                            <span x-text="guide.expanded ? 'Hide Details' : 'View Guide'"></span>
-                        </button>
-    
-                        <!-- ✅ Toggle Switch for Completion -->
-                        <label class="flex items-center cursor-pointer">
-                            <!-- Hidden Checkbox Input -->
-                            <input type="checkbox" class="hidden" @change="toggleGuideCompletion(guide)" :checked="guide.completed">
-                            
-                            <!-- Switch Background (Changes Color Based on Completion) -->
-                            <div class="relative w-10 h-5 rounded-full transition-all"
-                                 :class="guide.completed ? 'bg-green-500' : 'bg-gray-500'">
-                                
-                                <!-- Switch Knob (Moves When Checked) -->
-                                <div class="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-all"
-                                     :class="{'translate-x-5': guide.completed}">
-                                </div>
-                            </div>
-                        
-                            <!-- Label Text (Changes Text Color Based on Completion) -->
-                            <span class="ml-2 text-sm"
-                                  :class="guide.completed ? 'text-green-400' : 'text-gray-300'"
-                                  x-text="guide.completed ? 'Completed' : 'Incomplete'">
-                            </span>
-                        </label>
-                    </div>
-    
-                    <!-- 📖 Guide Details (Expandable) -->
-                    <div x-show="guide.expanded" class="mt-4 p-4 bg-gray-800 rounded-lg">
-                        <h4 class="text-md font-semibold text-white">Materials Needed:</h4>
-                        <ul class="list-disc list-inside text-gray-300">
-                            <template x-for="material in guide.materials">
-                                <li x-text="material"></li>
-                            </template>
-                        </ul>
-    
-                        <h4 class="text-md font-semibold text-white mt-2">Steps:</h4>
-                        <div class="list-decimal list-inside text-gray-300">
-                            <template x-for="step in guide.steps">
-                                <div x-html="markdownToHTML(step)"></div>
-                            </template>
-                        </div>
-    
-                        <h4 class="text-md font-semibold text-white mt-2">Tips:</h4>
-                        <ul class="list-disc list-inside text-gray-300">
-                            <template x-for="tip in guide.tips">
-                                <li x-html="markdownToHTML(tip)"></li>
-                            </template>
-                        </ul>
-                    </div>
+
+        <!-- Go Bag Checklist -->
+        <div class="mb-4 sm:mb-6 border-b border-gray-700 pb-4">
+          <div class="flex items-center gap-2 cursor-pointer py-2" @click="sections.goBag = !sections.goBag" role="button" :aria-expanded="sections.goBag">
+            <h4 class="text-base sm:text-lg font-semibold">🎒 Go Bag Checklist</h4>
+            <span class="ml-auto text-gray-400" x-text="sections.goBag ? '▲' : '▼'"></span>
+          </div>
+          <div x-show="sections.goBag" class="mt-4 space-y-2 sm:space-y-4">
+            <div class="space-y-2">
+              <template x-for="(item, index) in plan.goBag" :key="index">
+                <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                  <input x-model="item.name" type="text" placeholder="Item Name" class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" :aria-label="'Go Bag Item Name ' + index">
+                  <input x-model.number="item.quantity" type="number" placeholder="Qty" min="1" class="w-full sm:w-24 p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" :aria-label="'Go Bag Item Quantity ' + index">
+                  <button @click="removeGoBagItem(index)" class="mt-2 sm:mt-0 px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors cursor-pointer w-full sm:w-auto" :disabled="plan.goBag.length <= 1" :aria-label="'Remove Go Bag Item ' + index">Remove</button>
                 </div>
-            </template>
+              </template>
+              <button @click="addGoBagItem()" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors w-full sm:w-auto text-sm sm:text-base" aria-label="Add Go Bag Item">Add Go Bag Item</button>
+            </div>
+          </div>
         </div>
+
+        <!-- Family Roles and Communication -->
+        <div class="mb-4 sm:mb-6 border-b border-gray-700 pb-4">
+          <div class="flex items-center gap-2 cursor-pointer py-2" @click="sections.familyRoles = !sections.familyRoles" role="button" :aria-expanded="sections.familyRoles">
+            <h4 class="text-base sm:text-lg font-semibold">👨‍👩‍👧 Family Roles and Communication</h4>
+            <span class="ml-auto text-gray-400" x-text="sections.familyRoles ? '▲' : '▼'"></span>
+          </div>
+          <div x-show="sections.familyRoles" class="mt-4 space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1" for="familyRoles">Family Roles</label>
+              <textarea x-model="plan.familyRoles.roles" id="familyRoles" placeholder="Who grabs what..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Family Roles"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="reconnection">Reconnection Plan</label>
+              <textarea x-model="plan.familyRoles.reconnection" id="reconnection" placeholder="Text 'I'm safe'..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Reconnection Plan"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="beaconTools">Beacon Tool Usage</label>
+              <textarea x-model="plan.familyRoles.beaconTools" id="beaconTools" placeholder="Location tracking..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Beacon Tool Usage"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pet Emergency Plan -->
+        <div class="mb-4 sm:mb-6 border-b border-gray-700 pb-4">
+          <div class="flex items-center gap-2 cursor-pointer py-2" @click="sections.petPlan = !sections.petPlan" role="button" :aria-expanded="sections.petPlan">
+            <h4 class="text-base sm:text-lg font-semibold">🐶 Pet Emergency Plan</h4>
+            <span class="ml-auto text-gray-400" x-text="sections.petPlan ? '▲' : '▼'"></span>
+          </div>
+          <div x-show="sections.petPlan" class="mt-4 space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Pet Supplies</label>
+              <div class="space-y-2 sm:space-y-4 mt-2">
+                <template x-for="(item, index) in plan.petPlan.supplies" :key="index">
+                  <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                    <input x-model="item.name" type="text" placeholder="Item (e.g., Pet food)" class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" :aria-label="'Pet Supply Name ' + index">
+                    <input x-model.number="item.quantity" type="number" placeholder="Qty" min="1" class="w-full sm:w-24 p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" :aria-label="'Pet Supply Quantity ' + index">
+                    <button @click="removePetSupply(index)" class="mt-2 sm:mt-0 px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors cursor-pointer w-full sm:w-auto" :disabled="plan.petPlan.supplies.length <= 1" :aria-label="'Remove Pet Supply ' + index">Remove</button>
+                  </div>
+                </template>
+                <button @click="addPetSupply()" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors w-full sm:w-auto text-sm sm:text-base" aria-label="Add Pet Supply">Add Pet Supply</button>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Vet Contacts</label>
+              <div class="space-y-2 sm:space-y-4 mt-2">
+                <template x-for="(vet, index) in plan.petPlan.vetContacts" :key="index">
+                  <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                    <input x-model="vet.name" type="text" placeholder="Vet Name" class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" :aria-label="'Vet Name ' + index">
+                    <input x-model="vet.phone" type="tel" placeholder="Phone" class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" :aria-label="'Vet Phone ' + index">
+                    <button @click="removeVetContact(index)" class="mt-2 sm:mt-0 px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors cursor-pointer w-full sm:w-auto" :disabled="plan.petPlan.vetContacts.length <= 1" :aria-label="'Remove Vet Contact ' + index">Remove</button>
+                  </div>
+                </template>
+                <button @click="addVetContact()" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors w-full sm:w-auto text-sm sm:text-base" aria-label="Add Vet Contact">Add Vet Contact</button>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="petVaccinations">Pet Vaccination Records</label>
+              <textarea x-model="plan.petPlan.vaccinations" id="petVaccinations" placeholder="Vaccination records..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Pet Vaccination Records"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Drills & Practice Logs -->
+        <div class="mb-4 sm:mb-6 border-b border-gray-700 pb-4">
+          <div class="flex items-center gap-2 cursor-pointer py-2" @click="sections.drills = !sections.drills" role="button" :aria-expanded="sections.drills">
+            <h4 class="text-base sm:text-lg font-semibold">🧪 Drills & Practice Logs</h4>
+            <span class="ml-auto text-gray-400" x-text="sections.drills ? '▲' : '▼'"></span>
+          </div>
+          <div x-show="sections.drills" class="mt-4 space-y-2 sm:space-y-4">
+            <div class="space-y-2">
+              <template x-for="(drill, index) in plan.drills" :key="index">
+                <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                  <input x-model="drill.type" type="text" placeholder="Drill Type" class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" :aria-label="'Drill Type ' + index">
+                  <input x-model="drill.date" type="text" placeholder="Date" class="w-full sm:w-36 p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" :aria-label="'Drill Date ' + index">
+                  <input x-model="drill.participants" type="text" placeholder="Participants" class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base" :aria-label="'Drill Participants ' + index">
+                  <textarea x-model="drill.notes" placeholder="Notes" class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] text-sm sm:text-base" :aria-label="'Drill Notes ' + index"></textarea>
+                  <button @click="removeDrill(index)" class="mt-2 sm:mt-0 px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors cursor-pointer w-full sm:w-auto" :disabled="plan.drills.length <= 1" :aria-label="'Remove Drill ' + index">Remove</button>
+                </div>
+              </template>
+              <button @click="addDrill()" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors w-full sm:w-auto text-sm sm:text-base" aria-label="Add Drill">Add Drill</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emergency Plan Binder/Digital Vault -->
+        <div class="mb-4 sm:mb-6 border-b border-gray-700 pb-4">
+          <div class="flex items-center gap-2 cursor-pointer py-2" @click="sections.binder = !sections.binder" role="button" :aria-expanded="sections.binder">
+            <h4 class="text-base sm:text-lg font-semibold">📒 Emergency Plan Binder/Digital Vault</h4>
+            <span class="ml-auto text-gray-400" x-text="sections.binder ? '▲' : '▼'"></span>
+          </div>
+          <div x-show="sections.binder" class="mt-4 space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1" for="binderContents">Binder Contents</label>
+              <textarea x-model="plan.binder.contents" id="binderContents" placeholder="Plan, IDs, maps..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Binder Contents"></textarea>
+            </div>
+            <label class="flex items-center cursor-pointer">
+              <input type="checkbox" class="form-checkbox text-blue-500 h-5 w-5" x-model="plan.binder.created" aria-label="Binder Created">
+              <span class="ml-2 text-sm text-gray-300">Binder/Digital Vault Created</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Mindset and Psychological Prep -->
+        <div class="mb-4 sm:mb-6 border-b border-gray-700 pb-4">
+          <div class="flex items-center gap-2 cursor-pointer py-2" @click="sections.mindset = !sections.mindset" role="button" :aria-expanded="sections.mindset">
+            <h4 class="text-base sm:text-lg font-semibold">🧠 Mindset and Psychological Prep</h4>
+            <span class="ml-auto text-gray-400" x-text="sections.mindset ? '▲' : '▼'"></span>
+          </div>
+          <div x-show="sections.mindset" class="mt-4">
+            <label class="block text-sm font-medium mb-1" for="mindsetTechniques">Affirmations and Grounding</label>
+            <textarea x-model="plan.mindset.techniques" id="mindsetTechniques" placeholder="Affirmations, breathing..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Mindset Techniques"></textarea>
+          </div>
+        </div>
+
+        <!-- Optional Advanced Items -->
+        <div class="mb-4 sm:mb-6 border-b border-gray-700 pb-4">
+          <div class="flex items-center gap-2 cursor-pointer py-2" @click="sections.advanced = !sections.advanced" role="button" :aria-expanded="sections.advanced">
+            <h4 class="text-base sm:text-lg font-semibold">🏁 Optional Advanced Items</h4>
+            <span class="ml-auto text-gray-400" x-text="sections.advanced ? '▲' : '▼'"></span>
+          </div>
+          <div x-show="sections.advanced" class="mt-4 space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1" for="homeDefense">Home Defense Plan</label>
+              <textarea x-model="plan.advanced.homeDefense" id="homeDefense" placeholder="Defense strategies..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Home Defense Plan"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="ediblePlants">Edible Plant ID Guide</label>
+              <textarea x-model="plan.advanced.ediblePlants" id="ediblePlants" placeholder="Local plants..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Edible Plant Guide"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="waterPurification">DIY Water Purification</label>
+              <textarea x-model="plan.advanced.waterPurification" id="waterPurification" placeholder="Purification methods..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Water Purification"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="offGridComms">Off-Grid Communication</label>
+              <textarea x-model="plan.advanced.offGridComms" id="offGridComms" placeholder="Satellite phone, radio..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Off-Grid Communication"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="hiddenStash">Hidden Stash Locations</label>
+              <textarea x-model="plan.advanced.hiddenStash" id="hiddenStash" placeholder="Stash locations..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Hidden Stash Locations"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="primitiveSkills">Primitive Survival Skills</label>
+              <textarea x-model="plan.advanced.primitiveSkills" id="primitiveSkills" placeholder="Survival skills..." class="w-full p-2 sm:p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] text-sm sm:text-base" aria-label="Primitive Survival Skills"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+          <button @click="savePlan()" class="px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm sm:text-base" aria-label="Save Plan">Save Plan</button>
+          <button @click="exportPlan()" class="px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm sm:text-base" x-tooltip="'Exports plan as JSON'" aria-label="Export Plan as JSON">Export JSON</button>
+          <button @click="exportPlanPDF()" class="px-4 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm sm:text-base" x-tooltip="'Exports plan as PDF'" aria-label="Export Plan as PDF">Export PDF</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

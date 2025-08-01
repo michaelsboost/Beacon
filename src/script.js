@@ -1366,616 +1366,6 @@ document.addEventListener('alpine:init', () => {
   }
   }));
 
-  // Resource Management Mini-Game
-  Alpine.data('resourceGame', () => ({
-    resources: { 
-        water: 10,  // Fresh clean water supply
-        food: 5,    // General food supply (can be raw, cooked, or canned)
-        cookedMeat: 0,  // Safe cooked meat
-        rawMeat: 0,     // Needs to be cooked or may cause sickness
-        cannedFood: 2,  // Long-lasting but heavy food source
-        staleWater: 0,  // Unsafe water that may cause sickness
-        boiledWater: 0  // Safe water purified via fire
-    },
-    energy: 100,
-    health: 100,
-    hunger: 0, // Hunger level (0 = full, 100 = starving)
-    thirst: 0, // Thirst level (0 = hydrated, 100 = dehydrated)
-    daysSurvived: 0,
-    weather: "Clear",
-    season: "Spring",
-    temperature: 15,
-    injury: null,
-    sickness: null,
-    pet: null,
-    inventory: [
-        "bone knife", "wood", "stone", "rope", "charcoal", "medicine", 
-        "bandages", "wild herbs", "fish", "nuts", "berries", "flint"
-    ],
-    showStats: false,
-    showInventory: false,
-    showConsumption: false,
-    showCrafting: false,
-    eventLog: "",
-    alertMessage: "",
-    actionCount: 0, // Track number of actions taken
-  
-    // Initialize the game
-    init() {
-      this.updateWeather();
-      setInterval(() => this.updateWeather(), 60000); // Update weather every minute
-      setInterval(() => this.updateStatus(), 10000); // Update hunger, thirst, and health every 10 seconds
-    },
-  
-    // Update hunger, thirst, and health
-    updateStatus() {
-        // Ensure hunger and thirst never exceed 100
-        this.hunger = Math.min(this.hunger + 1, 100);
-        this.thirst = Math.min(this.thirst + 1, 100);
-    
-        // Apply effects of hunger and thirst
-        if (this.hunger >= 80) {
-            this.health = Math.max(this.health - 2, 0);
-            this.eventLog = "You're starving! Your health is deteriorating.";
-        }
-        if (this.thirst >= 80) {
-            this.health = Math.max(this.health - 2, 0);
-            this.eventLog = "You're dehydrated! Your health is deteriorating.";
-        }
-    
-        // Apply effects of injuries
-        if (this.injury) {
-            this.health = Math.max(this.health - 1, 0);
-            this.eventLog = `Your ${this.injury} is getting worse! Seek treatment soon.`;
-        }
-    
-        // Check for death
-        if (this.health <= 0) {
-            this.eventLog = "You have died. Game over.";
-            this.alertMessage = "Game Over! Refresh to restart.";
-            return;
-        }
-    
-        // Notify player of critical status
-        if (this.health < 30) {
-            this.alertMessage = "You're in critical condition! Rest or find medicine.";
-        } else if (this.energy < 20) {
-            this.alertMessage = "You're feeling fatigued. Rest to regain energy.";
-        } else if (this.hunger >= 80) {
-            this.alertMessage = "You're starving! Find food immediately.";
-        } else if (this.thirst >= 80) {
-            this.alertMessage = "You're dehydrated! Find water immediately.";
-        } else {
-            this.alertMessage = "";
-        }
-    },
-    
-    // Consume resources
-    consume(type) {
-        if (type === "food") {
-            const foodItems = [
-                { name: "cooked meat", hunger: 30, energy: 20, sickness: 0 },
-                { name: "raw meat", hunger: 15, energy: 10, sickness: 0.3 }, // 30% chance of sickness
-                { name: "fish", hunger: 15, energy: 10, sickness: 0.1 }, // 10% sickness chance
-                { name: "canned food", hunger: 20, energy: 15, sickness: 0 }, // Safe food
-                { name: "berries", hunger: 5, energy: 5, sickness: 0.1 }, // Mild sickness risk
-                { name: "nuts", hunger: 10, energy: 8, sickness: 0 },
-                { name: "mushrooms", hunger: 10, energy: 5, sickness: 0.2 }, // 20% chance of being poisonous
-                { name: "edible plants", hunger: 8, energy: 5, sickness: 0 },
-                { name: "wild herbs", hunger: 5, energy: 2, sickness: 0 }
-            ];
-    
-            let consumed = false;
-            for (let food of foodItems) {
-                if (this.inventory.includes(food.name)) {
-                    this.inventory.splice(this.inventory.indexOf(food.name), 1);
-                    this.hunger = Math.max(this.hunger - food.hunger, 0);
-                    this.energy = Math.min(this.energy + food.energy, 100);
-                    if (Math.random() < food.sickness) {
-                        this.sickness = "Food Poisoning";
-                        this.eventLog = `You ate ${food.name} and got food poisoning!`;
-                    } else {
-                        this.eventLog = `You ate ${food.name} and regained energy.`;
-                    }
-                    consumed = true;
-                    break;
-                }
-            }
-    
-            if (!consumed && this.resources.food > 0) {
-                this.resources.food -= 1;
-                this.hunger = Math.max(this.hunger - 20, 0);
-                this.energy = Math.min(this.energy + 15, 100);
-                this.eventLog = "You ate food and regained energy.";
-            } else if (!consumed) {
-                this.eventLog = "You don't have any food!";
-            }
-        } 
-        
-        else if (type === "water") {
-            const waterItems = [
-                { name: "boiled water", thirst: 25, health: 10, sickness: 0 }, // Safe to drink
-                { name: "fresh water", thirst: 20, health: 5, sickness: 0.05 }, // Slight risk
-                { name: "stale water", thirst: 10, health: 0, sickness: 0.3 }, // 30% sickness chance
-                { name: "rainwater", thirst: 15, health: 5, sickness: 0.1 } // 10% chance of being contaminated
-            ];
-    
-            let consumed = false;
-            for (let water of waterItems) {
-                if (this.inventory.includes(water.name)) {
-                    this.inventory.splice(this.inventory.indexOf(water.name), 1);
-                    this.thirst = Math.max(this.thirst - water.thirst, 0);
-                    this.health = Math.min(this.health + water.health, 100);
-                    if (Math.random() < water.sickness) {
-                        this.sickness = "Stomach Infection";
-                        this.eventLog = `You drank ${water.name} and got sick!`;
-                    } else {
-                        this.eventLog = `You drank ${water.name} and feel refreshed.`;
-                    }
-                    consumed = true;
-                    break;
-                }
-            }
-    
-            if (!consumed && this.resources.water > 0) {
-                this.resources.water -= 1;
-                this.thirst = Math.max(this.thirst - 20, 0);
-                this.health = Math.min(this.health + 5, 100);
-                this.eventLog = "You drank water and feel refreshed.";
-            } else if (!consumed) {
-                this.eventLog = "You have no water!";
-            }
-        } 
-        
-        else if (type === "medicine") {
-            if (this.inventory.includes("medicine")) {
-                this.inventory.splice(this.inventory.indexOf("medicine"), 1);
-                this.health = Math.min(this.health + 30, 100);
-                this.sickness = null;
-                this.eventLog = "You took medicine and recovered some health.";
-            } else if (this.inventory.includes("herbal tea")) {
-                this.inventory.splice(this.inventory.indexOf("herbal tea"), 1);
-                this.health = Math.min(this.health + 15, 100);
-                this.sickness = null;
-                this.eventLog = "You drank herbal tea and feel better.";
-            } else {
-                this.eventLog = "You don't have medicine!";
-            }
-        }
-    
-        this.checkForNextDay();
-    },
-  
-    // Forage for food
-    forageFood() {
-        if (this.energy < 10) {
-            this.eventLog = "You're too exhausted to forage!";
-            return;
-        }
-    
-        this.energy -= 10;
-    
-        const biomes = ["forest", "mountains", "swamp", "city"];
-        const selectedBiome = biomes[Math.floor(Math.random() * biomes.length)];
-        
-        const lootTable = {
-            forest: ["berries", "nuts", "mushrooms", "edible plants"],
-            mountains: ["roots", "mushrooms", "wild herbs"],
-            swamp: ["fish", "toxic plants", "frogs"],
-            city: ["canned food", "stale water", "scraps"]
-        };
-    
-        let foundItem = lootTable[selectedBiome][Math.floor(Math.random() * lootTable[selectedBiome].length)];
-        
-        if (foundItem === "toxic plants" || foundItem === "mushrooms" && Math.random() < 0.2) {
-            this.sickness = "Poisoning";
-            this.eventLog = `You foraged in the ${selectedBiome} and found ${foundItem}, but it made you sick!`;
-        } else {
-            this.inventory.push(foundItem);
-            this.eventLog = `You foraged in the ${selectedBiome} and found ${foundItem}.`;
-        }
-    
-        this.checkForNextDay();
-    },
-  
-    // Collect water
-    collectWater() {
-        if (this.energy < 8) {
-            this.eventLog = "You're too exhausted to collect water!";
-            return;
-        }
-    
-        this.energy -= 8;
-    
-        const waterSources = ["river", "lake", "puddle", "rainwater"];
-        const selectedSource = waterSources[Math.floor(Math.random() * waterSources.length)];
-    
-        let waterCollected = Math.floor(Math.random() * 4) + 1;
-    
-        if (selectedSource === "puddle" && Math.random() < 0.3) {
-            this.inventory.push("stale water");
-            this.eventLog = `You collected ${waterCollected} liters of water from a puddle, but it looks questionable.`;
-        } else {
-            this.inventory.push("fresh water");
-            this.eventLog = `You collected ${waterCollected} liters of fresh water from a ${selectedSource}!`;
-        }
-    
-        this.checkForNextDay();
-    },
-  
-    // Hunt for food and pelts
-    hunt() {
-        if (this.energy < 15) {
-            this.eventLog = "You're too exhausted to hunt!";
-            return;
-        }
-    
-        this.energy -= 15;
-        const weapons = {
-            "bare hands": { success: 0.3, bonusMeat: 0 },
-            "bone knife": { success: 0.5, bonusMeat: 1 },
-            "spear": { success: 0.7, bonusMeat: 2 },
-            "bow": { success: 0.85, bonusMeat: 3 },
-            "trap": { success: 0.9, bonusMeat: 2 }
-        };
-    
-        let bestWeapon = "bare hands";
-        for (let weapon in weapons) {
-            if (this.inventory.includes(weapon)) {
-                bestWeapon = weapon;
-                break;
-            }
-        }
-    
-        let weaponStats = weapons[bestWeapon];
-        let huntSuccess = Math.random() < weaponStats.success;
-    
-        if (huntSuccess) {
-            const animals = [
-                { name: "Rabbit", chance: 0.4, baseMeat: 2 },
-                { name: "Deer", chance: 0.3, baseMeat: 5 },
-                { name: "Boar", chance: 0.2, baseMeat: 7 },
-                { name: "Wolf", chance: 0.1, baseMeat: 6 },
-                { name: "Bear", chance: 0.05, baseMeat: 12 }
-            ];
-    
-            let animal = animals.find(a => Math.random() < a.chance);
-            let meatGained = animal.baseMeat + weaponStats.bonusMeat;
-    
-            this.resources.food += meatGained;
-            this.inventory.push("pelt");
-    
-            this.eventLog = `You successfully hunted a ${animal.name} and got +${meatGained} kg of meat and a pelt!`;
-    
-        } else {
-            this.health -= 10;
-            this.eventLog = "Your hunt failed, and you got injured.";
-        }
-    
-        this.checkForNextDay();
-    },
-  
-    // Rest to regain energy and health
-    rest() {
-      this.energy = Math.min(this.energy + 30, 100);
-      this.health = Math.min(this.health + 20, 100);
-      this.eventLog = "You rested and regained 30 energy and 20 health.";
-      this.checkForNextDay();
-    },
-  
-    // Explore to find loot
-    explore() {
-        if (this.energy < 10) {
-            this.eventLog = "You're too exhausted to explore!";
-            return;
-        }
-    
-        this.energy -= 10;
-        const biomes = ["forest", "mountains", "abandonedCamp", "riverbank", "cave", "city"];
-        const selectedBiome = biomes[Math.floor(Math.random() * biomes.length)];
-        let foundItem = null;
-    
-        const lootTable = {
-            forest: {
-                common: ["wood", "berries", "rope"],
-                uncommon: ["fur", "bone", "mushrooms"],
-                rare: ["hidden map", "camouflageGear"]
-            },
-            mountains: {
-                common: ["stone", "rope"],
-                uncommon: ["flint", "bone knife", "metal ore"],
-                rare: ["ancient artifact", "compass"]
-            },
-            abandonedCamp: {
-                common: ["charcoal", "stale water", "cloth"],
-                uncommon: ["fire starter", "bandages", "alcohol"],
-                rare: ["medicine", "reinforcedDoor"]
-            },
-            riverbank: {
-                common: ["stick", "fish", "water"],
-                uncommon: ["hook", "clay", "herbs"],
-                rare: ["boiled water", "gold coin"]
-            },
-            cave: {
-                common: ["stone", "bone"],
-                uncommon: ["bat meat", "fire starter"],
-                rare: ["hidden treasure", "ancient artifact"]
-            },
-            city: {
-                common: ["scrap metal", "plastic bottle", "cloth"],
-                uncommon: ["electronics", "batteries", "canned food", "bandages"],
-                rare: ["firearm", "ammo", "gold watch", "blueprints"]
-            }
-        };
-    
-        const find = Math.random();
-        if (find < 0.5) foundItem = lootTable[selectedBiome].common[Math.floor(Math.random() * lootTable[selectedBiome].common.length)];
-        else if (find < 0.8) foundItem = lootTable[selectedBiome].uncommon[Math.floor(Math.random() * lootTable[selectedBiome].uncommon.length)];
-        else foundItem = lootTable[selectedBiome].rare[Math.floor(Math.random() * lootTable[selectedBiome].rare.length)];
-    
-        if (foundItem) {
-            // ✅ Auto-add food and water to resources instead of inventory
-            if (["fish", "berries", "mushrooms", "bat meat", "canned food"].includes(foundItem)) {
-                this.resources.food += 2;
-                this.eventLog = `You explored the ${selectedBiome} and found food: ${foundItem}! +2 kg food.`;
-            } else if (["water", "boiled water", "stale water"].includes(foundItem)) {
-                this.resources.water += 2;
-                this.eventLog = `You explored the ${selectedBiome} and found water: ${foundItem}! +2 liters water.`;
-            } else {
-                this.inventory.push(foundItem);
-                this.eventLog = `You explored the ${selectedBiome} and found ${foundItem}!`;
-            }
-        } else {
-            this.eventLog = `You explored the ${selectedBiome} but found nothing useful.`;
-        }
-    
-        this.checkForNextDay();
-    },
-  
-    // Trade items for resources
-    trade() {
-        if (this.inventory.length === 0) {
-            this.eventLog = "You have nothing to trade.";
-            return;
-        }
-    
-        const traders = [
-            { type: "Fair Trader", bonusChance: 0.3, scamChance: 0 },
-            { type: "Greedy Merchant", bonusChance: 0.1, scamChance: 0.2 },
-            { type: "Black Market Dealer", bonusChance: 0.5, scamChance: 0.4 },
-            { type: "Nomadic Hunter", bonusChance: 0.25, scamChance: 0.05 },
-            { type: "Shady Smuggler", bonusChance: 0.6, scamChance: 0.3 }
-        ];
-    
-        let trader = traders[Math.floor(Math.random() * traders.length)];
-        let tradeItem = this.inventory[Math.floor(Math.random() * this.inventory.length)];
-    
-        const tradeValues = {
-            wood: { food: 2 }, stone: { food: 2 }, rope: { food: 3 },
-            berries: { food: 2 }, mushrooms: { food: 3 }, cannedFood: { food: 5 },
-            fish: { food: 4 }, batMeat: { food: 5 }, bone: { food: 3 },
-            fireStarter: { food: 7 }, medicine: { food: 10, water: 2 },
-            alcohol: { food: 8, water: 2 }, bandages: { food: 5 }, herbs: { food: 4 },
-            goldCoin: { food: 15, water: 5 }, ancientArtifact: { food: 20, water: 10 },
-            staleWater: { water: 2 }, boiledWater: { water: 5 }
-        };
-    
-        if (Math.random() < trader.scamChance) {
-            this.inventory.splice(this.inventory.indexOf(tradeItem), 1);
-            this.eventLog = `${trader.type} scammed you! You lost ${tradeItem} without getting anything.`;
-        } else {
-            let foodGained = tradeValues[tradeItem]?.food || 0;
-            let waterGained = tradeValues[tradeItem]?.water || 0;
-            this.resources.food += foodGained;
-            this.resources.water += waterGained;
-            this.inventory.splice(this.inventory.indexOf(tradeItem), 1);
-    
-            this.eventLog = `You traded ${tradeItem} with a ${trader.type} for ${foodGained} kg of food and ${waterGained} liters of water.`;
-    
-            if (Math.random() < trader.bonusChance) {
-                let bonusFood = Math.floor(Math.random() * 3) + 2;
-                let bonusWater = Math.floor(Math.random() * 2) + 1;
-                this.resources.food += bonusFood;
-                this.resources.water += bonusWater;
-                this.eventLog += ` The trader gave you a bonus: +${bonusFood} food, +${bonusWater} water!`;
-            }
-        }
-    
-        this.checkForNextDay();
-    },
-  
-    // Crafting recipes
-    craftingRecipes: {
-        // 🔪 Basic Tools
-        spear: { materials: ["wood", "stone"], energy: 15 },
-        bow: { materials: ["wood", "rope", "stone"], energy: 25 },
-        axe: { materials: ["wood", "stone", "rope"], energy: 20 },
-        knife: { materials: ["stone", "rope"], energy: 10 },
-        boneKnife: { materials: ["bone", "rope"], energy: 10 },
-        fishingRod: { materials: ["rope", "stick", "hook"], energy: 15 },
-        
-        // 🔥 Fire & Cooking
-        fireStarter: { materials: ["charcoal", "wood"], energy: 10 },
-        clayPot: { materials: ["clay", "fire"], energy: 15 },
-        cookingGrill: { materials: ["metal", "rope"], energy: 20 },
-        smoker: { materials: ["wood", "rope", "fire"], energy: 25 },
-        
-        // 🏠 Shelter & Survival
-        shelter: { materials: ["wood", "rope"], energy: 20 },
-        raft: { materials: ["wood", "rope"], energy: 30 },
-        tent: { materials: ["cloth", "rope", "wood"], energy: 25 },
-        storageBox: { materials: ["wood", "rope"], energy: 15 },
-        animalTraps: { materials: ["rope", "wood", "bait"], energy: 20 },
-        
-        // 🧥 Clothing & Protection
-        warmClothing: { materials: ["fur", "cloth"], energy: 20 },
-        snowshoes: { materials: ["wood", "rope"], energy: 10 },
-        camouflageGear: { materials: ["cloth", "mud"], energy: 15 },
-        
-        // 🏺 Medicine & Healing
-        herbalTea: { materials: ["herbs", "boiled water"], energy: 5 },
-        bandages: { materials: ["cloth", "herbs"], energy: 5 },
-        antiseptic: { materials: ["alcohol", "herbs"], energy: 10 },
-        painkillers: { materials: ["herbs", "water"], energy: 10 },
-        
-        // ⚒️ Advanced Tools
-        metalTools: { materials: ["metal", "fire", "rope"], energy: 30 },
-        pickaxe: { materials: ["wood", "stone", "rope"], energy: 20 },
-        shovel: { materials: ["wood", "metal"], energy: 15 },
-        compass: { materials: ["metal", "glass", "magnet"], energy: 25 },
-        
-        // 🌊 Water & Filtration
-        waterFilter: { materials: ["charcoal", "cloth", "sand"], energy: 10 },
-        canteen: { materials: ["gourd", "fire"], energy: 10 },
-        
-        // 🔫 Hunting & Combat
-        arrows: { materials: ["wood", "stone"], energy: 10 },
-        bowstring: { materials: ["rope", "gut"], energy: 5 },
-        slingshot: { materials: ["wood", "rope", "stone"], energy: 15 },
-        bola: { materials: ["rope", "stone"], energy: 15 },
-        
-        // 📜 Special & Rare Items
-        hiddenMap: { materials: ["parchment", "ink"], energy: 10 },
-        torch: { materials: ["wood", "cloth", "oil"], energy: 10 },
-        reinforcedArmor: { materials: ["metal", "leather"], energy: 40 },
-        
-        // 🏗️ Construction & Expansion
-        ladder: { materials: ["wood", "rope"], energy: 20 },
-        bridge: { materials: ["wood", "rope"], energy: 50 },
-    },
-  
-    // Get available crafting options based on inventory
-    availableCraftingOptions() {
-      let options = {};
-      for (let item in this.craftingRecipes) {
-        const recipe = this.craftingRecipes[item];
-  
-        // Ensure player has all materials before allowing crafting
-        const canCraft = recipe.materials.every(mat => this.inventory.includes(mat));
-  
-        if (canCraft) {
-          options[item] = recipe;
-        }
-      }
-      return options;
-    },
-  
-    // Craft an item
-    craft(item) {
-      const recipe = this.craftingRecipes[item];
-  
-      if (!recipe) {
-        this.eventLog = "That item cannot be crafted.";
-        return;
-      }
-  
-      if (this.energy < recipe.energy) {
-        this.eventLog = "You're too exhausted to craft!";
-        return;
-      }
-  
-      // Ensure materials exist before crafting
-      for (let mat of recipe.materials) {
-        if (!this.inventory.includes(mat)) {
-          this.eventLog = `You don't have enough ${mat} to craft ${item}.`;
-          return;
-        }
-      }
-  
-      // Remove used materials
-      recipe.materials.forEach(mat => {
-        const index = this.inventory.indexOf(mat);
-        if (index > -1) {
-          this.inventory.splice(index, 1);
-        }
-      });
-  
-      // Deduct energy and add crafted item to inventory
-      this.energy -= recipe.energy;
-      this.inventory.push(item);
-      this.eventLog = `You crafted a ${item}!`;
-  
-      // Force Alpine.js to update UI properly
-      Alpine.nextTick(() => this.showCrafting = true);
-    },
-    
-    // Check if a new day should start
-    checkForNextDay() {
-      this.actionCount++;
-      if (this.actionCount >= 3) { // Trigger next day after 3 actions
-        this.nextDay();
-        this.actionCount = 0; // Reset action count
-      }
-    },
-  
-    // Simulate the next day
-    nextDay() {
-      this.daysSurvived++;
-      this.energy = Math.max(this.energy - 10, 0); // Daily energy drain
-      this.resources.water = Math.max(this.resources.water - 2, 0); // Daily water consumption
-      this.resources.food = Math.max(this.resources.food - 1, 0); // Daily food consumption
-  
-      if (this.resources.water <= 0) {
-        this.thirst += 20;
-        this.eventLog = "You're dehydrated! Your thirst level increased.";
-      }
-      if (this.resources.food <= 0) {
-        this.hunger += 20;
-        this.eventLog = "You're starving! Your hunger level increased.";
-      }
-      if (this.temperature < 0) {
-        this.health -= 5;
-        this.eventLog = "It's freezing! You lost 5 health.";
-      }
-      if (this.temperature > 30) {
-        this.health -= 5;
-        this.eventLog = "It's scorching hot! You lost 5 health.";
-      }
-  
-      this.updateWeather();
-      this.updateSeason();
-    },
-  
-    // Update weather conditions
-    updateWeather() {
-      const weatherTypes = ["Clear", "Rainy", "Stormy", "Snowy"];
-      this.weather = weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
-      if (this.weather === "Rainy") {
-        this.resources.water += 2; // Rain increases water supply
-        this.eventLog = "It's raining! You collected 2 liters of water.";
-      } else if (this.weather === "Stormy") {
-        this.health -= 5; // Storms are dangerous
-        this.eventLog = "A storm is raging! You lost 5 health.";
-      } else if (this.weather === "Snowy") {
-        this.temperature -= 10; // Snow lowers temperature
-        this.eventLog = "It's snowing! The temperature dropped by 10°C.";
-      }
-    },
-  
-    // Update seasonal effects
-    updateSeason() {
-      const seasons = ["Spring", "Summer", "Fall", "Winter"];
-      this.season = seasons[Math.floor(Math.random() * seasons.length)];
-      if (this.season === "Winter") {
-        this.temperature -= 15; // Winter is cold
-        this.eventLog = "Winter has arrived! The temperature dropped significantly.";
-      } else if (this.season === "Summer") {
-        this.temperature += 15; // Summer is hot
-        this.eventLog = "Summer is here! The temperature rose significantly.";
-      }
-    },
-  
-    // Toggle UI sections
-    toggleStats() { 
-      this.showStats = !this.showStats; 
-      this.showInventory = !this.showInventory;
-    },
-    toggleCrafting() { 
-      this.showCrafting = !this.showCrafting; 
-      Alpine.nextTick(() => this.availableCraftingOptions()); // Force Alpine update
-    }
-  }));
-
   // Emergency Preparedness Checklist
   Alpine.data('emergencyChecklist', () => ({
     categories: loadStateFromLocalStorage("emergencyCategories", [
@@ -2285,11 +1675,9 @@ document.addEventListener('alpine:init', () => {
       currentVersion: "1.0.5",  // Update this every time you release a new version
       latestVersion: null,
       updateAvailable: false,
-  
       init() {
           this.checkForUpdate();
       },
-  
       async checkForUpdate() {
           try {
               let response = await fetch('/version.json', { cache: 'no-cache' });
@@ -2327,7 +1715,7 @@ document.addEventListener('alpine:init', () => {
           const appData = {
               emergencyCategories: JSON.parse(localStorage.getItem("emergencyCategories") || "[]"),
               guides: JSON.parse(localStorage.getItem("guides") || "[]"),
-              skillPoints: JSON.parse(localStorage.getItem("skillPoints") || "0"),
+              plan: JSON.parse(localStorage.getItem("emergencyPlan") || "[]"),
               skills: JSON.parse(localStorage.getItem("skills") || "[]")
           };
       
@@ -5083,5 +4471,314 @@ document.addEventListener('alpine:init', () => {
       updateProgress() {
           this.libraryProgress;
       }
+  }));
+
+  // Emergency Plan Component
+  Alpine.data('emergencyPlan', () => ({
+    sections: {
+      coreIdentity: true,
+      scenarios: false,
+      goBag: false,
+      familyRoles: false,
+      petPlan: false,
+      drills: false,
+      binder: false,
+      mindset: false,
+      advanced: false,
+    },
+    plan: loadStateFromLocalStorage('emergencyPlan', {
+      coreIdentity: {
+        safeWord: '',
+        primaryMeetup: '',
+        backupMeetup: '',
+        contacts: [{ name: '', phone: '', role: '' }],
+        familyMembers: [{ name: '', birthday: '', allergies: '', medications: '', bloodType: '' }],
+      },
+      scenarios: {
+        fireEscape: '',
+        powerOutage: '',
+        medicalEmergency: '',
+        intruder: '',
+        severeWeather: '',
+        evacuation: '',
+        civilUnrest: '',
+      },
+      goBag: [
+        { name: 'Water (bottles + filter)', quantity: 1 },
+        { name: 'Non-perishable food (3 days)', quantity: 1 },
+        { name: 'First aid kit', quantity: 1 },
+        { name: 'Whistle', quantity: 1 },
+        { name: 'Emergency blanket', quantity: 1 },
+        { name: 'Headlamp or flashlight', quantity: 1 },
+        { name: 'Extra clothes', quantity: 1 },
+        { name: 'Emergency radio', quantity: 1 },
+        { name: 'Copies of documents (ID, insurance)', quantity: 1 },
+        { name: 'Cash (small bills)', quantity: 1 },
+        { name: 'Multi-tool', quantity: 1 },
+        { name: 'Charger + power bank', quantity: 1 },
+        { name: 'Personal hygiene items', quantity: 1 },
+        { name: 'Face masks', quantity: 1 },
+        { name: 'Medications', quantity: 1 },
+        { name: 'Maps (digital + printed)', quantity: 1 },
+        { name: 'Notebook and pen', quantity: 1 },
+      ],
+      familyRoles: {
+        roles: '',
+        reconnection: '',
+        beaconTools: '',
+      },
+      petPlan: {
+        supplies: [{ name: '', quantity: 1 }],
+        vetContacts: [{ name: '', phone: '' }],
+        vaccinations: '',
+      },
+      drills: [{ type: '', date: '', participants: '', notes: '' }],
+      binder: {
+        contents: '',
+        created: false,
+      },
+      mindset: {
+        techniques: '',
+      },
+      advanced: {
+        homeDefense: '',
+        ediblePlants: '',
+        waterPurification: '',
+        offGridComms: '',
+        hiddenStash: '',
+        primitiveSkills: '',
+      },
+    }),
+    init() {
+      // Ensure critical arrays exist
+      this.plan.coreIdentity.contacts = Array.isArray(this.plan.coreIdentity.contacts) ? this.plan.coreIdentity.contacts : [{ name: '', phone: '', role: '' }];
+      this.plan.coreIdentity.familyMembers = Array.isArray(this.plan.coreIdentity.familyMembers) ? this.plan.coreIdentity.familyMembers : [{ name: '', birthday: '', allergies: '', medications: '', bloodType: '' }];
+      this.plan.goBag = Array.isArray(this.plan.goBag) ? this.plan.goBag : [{ name: '', quantity: 1 }];
+      this.plan.petPlan.supplies = Array.isArray(this.plan.petPlan.supplies) ? this.plan.petPlan.supplies : [{ name: '', quantity: 1 }];
+      this.plan.petPlan.vetContacts = Array.isArray(this.plan.petPlan.vetContacts) ? this.plan.petPlan.vetContacts : [{ name: '', phone: '' }];
+      this.plan.drills = Array.isArray(this.plan.drills) ? this.plan.drills : [{ type: '', date: '', participants: '', notes: '' }];
+    },
+    addContact() {
+      if (!Array.isArray(this.plan.coreIdentity.contacts)) {
+        this.plan.coreIdentity.contacts = [];
+      }
+      this.plan.coreIdentity.contacts.push({ name: '', phone: '', role: '' });
+      saveStateToLocalStorage('emergencyPlan', this.plan);
+    },
+    removeContact(index) {
+      if (Array.isArray(this.plan.coreIdentity.contacts) && this.plan.coreIdentity.contacts.length > 1) {
+        this.plan.coreIdentity.contacts.splice(index, 1);
+        saveStateToLocalStorage('emergencyPlan', this.plan);
+      }
+    },
+    addFamilyMember() {
+      if (!Array.isArray(this.plan.coreIdentity.familyMembers)) {
+        this.plan.coreIdentity.familyMembers = [];
+      }
+      this.plan.coreIdentity.familyMembers.push({ name: '', birthday: '', allergies: '', medications: '', bloodType: '' });
+      saveStateToLocalStorage('emergencyPlan', this.plan);
+    },
+    removeFamilyMember(index) {
+      if (Array.isArray(this.plan.coreIdentity.familyMembers) && this.plan.coreIdentity.familyMembers.length > 1) {
+        this.plan.coreIdentity.familyMembers.splice(index, 1);
+        saveStateToLocalStorage('emergencyPlan', this.plan);
+      }
+    },
+    addGoBagItem() {
+      if (!Array.isArray(this.plan.goBag)) {
+        this.plan.goBag = [];
+      }
+      this.plan.goBag.push({ name: '', quantity: 1 });
+      saveStateToLocalStorage('emergencyPlan', this.plan);
+    },
+    removeGoBagItem(index) {
+      if (Array.isArray(this.plan.goBag) && this.plan.goBag.length > 1) {
+        this.plan.goBag.splice(index, 1);
+        saveStateToLocalStorage('emergencyPlan', this.plan);
+      }
+    },
+    addPetSupply() {
+      if (!Array.isArray(this.plan.petPlan.supplies)) {
+        this.plan.petPlan.supplies = [];
+      }
+      this.plan.petPlan.supplies.push({ name: '', quantity: 1 });
+      saveStateToLocalStorage('emergencyPlan', this.plan);
+    },
+    removePetSupply(index) {
+      if (Array.isArray(this.plan.petPlan.supplies) && this.plan.petPlan.supplies.length > 1) {
+        this.plan.petPlan.supplies.splice(index, 1);
+        saveStateToLocalStorage('emergencyPlan', this.plan);
+      }
+    },
+    addVetContact() {
+      if (!Array.isArray(this.plan.petPlan.vetContacts)) {
+        this.plan.petPlan.vetContacts = [];
+      }
+      this.plan.petPlan.vetContacts.push({ name: '', phone: '' });
+      saveStateToLocalStorage('emergencyPlan', this.plan);
+    },
+    removeVetContact(index) {
+      if (Array.isArray(this.plan.petPlan.vetContacts) && this.plan.petPlan.vetContacts.length > 1) {
+        this.plan.petPlan.vetContacts.splice(index, 1);
+        saveStateToLocalStorage('emergencyPlan', this.plan);
+      }
+    },
+    addDrill() {
+      if (!Array.isArray(this.plan.drills)) {
+        this.plan.drills = [];
+      }
+      this.plan.drills.push({ type: '', date: '', participants: '', notes: '' });
+      saveStateToLocalStorage('emergencyPlan', this.plan);
+    },
+    removeDrill(index) {
+      if (Array.isArray(this.plan.drills) && this.plan.drills.length > 1) {
+        this.plan.drills.splice(index, 1);
+        saveStateToLocalStorage('emergencyPlan', this.plan);
+      }
+    },
+    savePlan() {
+      saveStateToLocalStorage('emergencyPlan', this.plan);
+      alert('Plan saved successfully!');
+    },
+    exportPlan() {
+      const blob = new Blob([JSON.stringify(this.plan)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'emergency-plan.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    exportPlanPDF() {
+      if (!window.jspdf) {
+        console.error('jsPDF not loaded');
+        alert('PDF export failed: jsPDF not loaded');
+        return;
+      }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 10;
+
+      const addText = (text, x, y, size, isBold = false) => {
+        if (y > 270) {
+          doc.addPage();
+          y = 10;
+        }
+        doc.setFontSize(size);
+        doc.setFont('helvetica', isBold ? 'bold' : 'normal');
+        const lines = doc.splitTextToSize(text, 180);
+        doc.text(lines, x, y);
+        return y + lines.length * (size / 2);
+      };
+
+      y = addText('Emergency Preparedness Plan', 10, y, 16, true);
+      y += 5;
+      y = addText('Core Identity and Safety', 10, y, 12, true);
+      y = addText(`Safe Word: ${this.plan.coreIdentity.safeWord || 'Not specified'}`, 15, y, 10);
+      y = addText(`Primary Meet-up: ${this.plan.coreIdentity.primaryMeetup || 'Not specified'}`, 15, y, 10);
+      y = addText(`Backup Meet-up: ${this.plan.coreIdentity.backupMeetup || 'Not specified'}`, 15, y, 10);
+      y = addText('Emergency Contacts:', 15, y, 10, true);
+      if (!Array.isArray(this.plan.coreIdentity.contacts) || this.plan.coreIdentity.contacts.every(c => !c.name && !c.phone && !c.role)) {
+        y = addText('No contacts specified.', 20, y, 10);
+      } else {
+        this.plan.coreIdentity.contacts.forEach(c => {
+          y = addText(`${c.name || 'Unnamed'}: ${c.phone || 'No phone'} (${c.role || 'No role'})`, 20, y, 10);
+        });
+      }
+      y = addText('Family Members:', 15, y, 10, true);
+      if (!Array.isArray(this.plan.coreIdentity.familyMembers) || this.plan.coreIdentity.familyMembers.every(m => !m.name && !m.birthday && !m.allergies && !m.medications && !m.bloodType)) {
+        y = addText('No family members specified.', 20, y, 10);
+      } else {
+        this.plan.coreIdentity.familyMembers.forEach(m => {
+          y = addText(`${m.name || 'Unnamed'}: Birthday: ${m.birthday || 'N/A'}, Allergies: ${m.allergies || 'None'}, Medications: ${m.medications || 'None'}, Blood Type: ${m.bloodType || 'N/A'}`, 20, y, 10);
+        });
+      }
+      y += 5;
+      y = addText('Scenario-Specific Response Plans', 10, y, 12, true);
+      y = addText('Fire Escape Plan:', 15, y, 10, true);
+      y = addText(this.plan.scenarios.fireEscape || 'Not specified', 15, y, 10);
+      y = addText('Power Outage Plan:', 15, y, 10, true);
+      y = addText(this.plan.scenarios.powerOutage || 'Not specified', 15, y, 10);
+      y = addText('Medical Emergency Plan:', 15, y, 10, true);
+      y = addText(this.plan.scenarios.medicalEmergency || 'Not specified', 15, y, 10);
+      y = addText('Home Intruder / Lockdown Plan:', 15, y, 10, true);
+      y = addText(this.plan.scenarios.intruder || 'Not specified', 15, y, 10);
+      y = addText('Severe Weather Plans:', 15, y, 10, true);
+      y = addText(this.plan.scenarios.severeWeather || 'Not specified', 15, y, 10);
+      y = addText('Evacuation Plan:', 15, y, 10, true);
+      y = addText(this.plan.scenarios.evacuation || 'Not specified', 15, y, 10);
+      y = addText('Civil Unrest / Martial Law Plan:', 15, y, 10, true);
+      y = addText(this.plan.scenarios.civilUnrest || 'Not specified', 15, y, 10);
+      y += 5;
+      y = addText('Go Bag Checklist', 10, y, 12, true);
+      if (!Array.isArray(this.plan.goBag) || this.plan.goBag.every(i => !i.name)) {
+        y = addText('No items specified.', 15, y, 10);
+      } else {
+        this.plan.goBag.forEach(i => {
+          y = addText(`${i.name || 'Unnamed'}: ${i.quantity || 0}`, 15, y, 10);
+        });
+      }
+      y += 5;
+      y = addText('Family Roles and Communication', 10, y, 12, true);
+      y = addText('Roles:', 15, y, 10, true);
+      y = addText(this.plan.familyRoles.roles || 'Not specified', 15, y, 10);
+      y = addText('Reconnection Plan:', 15, y, 10, true);
+      y = addText(this.plan.familyRoles.reconnection || 'Not specified', 15, y, 10);
+      y = addText('Beacon Tool Usage:', 15, y, 10, true);
+      y = addText(this.plan.familyRoles.beaconTools || 'Not specified', 15, y, 10);
+      y += 5;
+      y = addText('Pet Emergency Plan', 10, y, 12, true);
+      y = addText('Pet Supplies:', 15, y, 10, true);
+      if (!Array.isArray(this.plan.petPlan.supplies) || this.plan.petPlan.supplies.every(s => !s.name)) {
+        y = addText('No supplies specified.', 20, y, 10);
+      } else {
+        this.plan.petPlan.supplies.forEach(s => {
+          y = addText(`${s.name || 'Unnamed'}: ${s.quantity || 0}`, 20, y, 10);
+        });
+      }
+      y = addText('Vet Contacts:', 15, y, 10, true);
+      if (!Array.isArray(this.plan.petPlan.vetContacts) || this.plan.petPlan.vetContacts.every(v => !v.name && !v.phone)) {
+        y = addText('No vet contacts specified.', 20, y, 10);
+      } else {
+        this.plan.petPlan.vetContacts.forEach(v => {
+          y = addText(`${v.name || 'Unnamed'}: ${v.phone || 'No phone'}`, 20, y, 10);
+        });
+      }
+      y = addText('Vaccination Records:', 15, y, 10, true);
+      y = addText(this.plan.petPlan.vaccinations || 'Not specified', 15, y, 10);
+      y += 5;
+      y = addText('Drills & Practice Logs', 10, y, 12, true);
+      if (!Array.isArray(this.plan.drills) || this.plan.drills.every(d => !d.type && !d.date && !d.participants && !d.notes)) {
+        y = addText('No drills specified.', 15, y, 10);
+      } else {
+        this.plan.drills.forEach(d => {
+          y = addText(`${d.type || 'Untitled Drill'} (${d.date || 'No date'}): ${d.participants || 'No participants'}`, 15, y, 10);
+          y = addText(`Notes: ${d.notes || 'None'}`, 20, y, 10);
+        });
+      }
+      y += 5;
+      y = addText('Emergency Plan Binder/Digital Vault', 10, y, 12, true);
+      y = addText(`Contents: ${this.plan.binder.contents || 'Not specified'}`, 15, y, 10);
+      y = addText(`Created: ${this.plan.binder.created ? 'Yes' : 'No'}`, 15, y, 10);
+      y += 5;
+      y = addText('Mindset and Psychological Prep', 10, y, 12, true);
+      y = addText(this.plan.mindset.techniques || 'Not specified', 15, y, 10);
+      y += 5;
+      y = addText('Optional Advanced Items', 10, y, 12, true);
+      y = addText('Home Defense Plan:', 15, y, 10, true);
+      y = addText(this.plan.advanced.homeDefense || 'Not specified', 15, y, 10);
+      y = addText('Edible Plant ID Guide:', 15, y, 10, true);
+      y = addText(this.plan.advanced.ediblePlants || 'Not specified', 15, y, 10);
+      y = addText('DIY Water Purification:', 15, y, 10, true);
+      y = addText(this.plan.advanced.waterPurification || 'Not specified', 15, y, 10);
+      y = addText('Off-Grid Communication:', 15, y, 10, true);
+      y = addText(this.plan.advanced.offGridComms || 'Not specified', 15, y, 10);
+      y = addText('Hidden Stash Locations:', 15, y, 10, true);
+      y = addText(this.plan.advanced.hiddenStash || 'Not specified', 15, y, 10);
+      y = addText('Primitive Survival Skills:', 15, y, 10, true);
+      y = addText(this.plan.advanced.primitiveSkills || 'Not specified', 15, y, 10);
+
+      doc.save('emergency-plan.pdf');
+    },
   }));
 });
