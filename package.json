@@ -1,6 +1,6 @@
 {
   "name": "beacon",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "type": "module",
   "scripts": {
     "build:css": "postcss src/bundle.css -o dist/bundle.css",

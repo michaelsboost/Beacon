@@ -1672,7 +1672,7 @@ document.addEventListener('alpine:init', () => {
   // Survival Tools
   Alpine.data('survivalTools', () => ({
     status: {
-      currentVersion: "1.0.5",  // Update this every time you release a new version
+      currentVersion: "1.0.6",  // Update this every time you release a new version
       latestVersion: null,
       updateAvailable: false,
       init() {
