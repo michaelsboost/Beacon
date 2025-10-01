@@ -1672,7 +1672,7 @@ document.addEventListener('alpine:init', () => {
   // Survival Tools
   Alpine.data('survivalTools', () => ({
     status: {
-      currentVersion: "1.0.6",  // Update this every time you release a new version
+      currentVersion: "1.0.7",  // Update this every time you release a new version
       latestVersion: null,
       updateAvailable: false,
       init() {
@@ -1792,19 +1792,13 @@ document.addEventListener('alpine:init', () => {
     },
 
     initCompass() {
-        if ('ondeviceorientationabsolute' in window) {
-            window.addEventListener('deviceorientationabsolute', (event) => {
-                this.compass.heading = Math.round(event.alpha);
-
-                // Access the arrow via Alpine's $refs
-                let arrow = this.$root.querySelector('[x-ref="compassArrow"]');
-                if (arrow) {
-                    arrow.style.transform = `rotate(${360 - this.compass.heading}deg)`;
-                }
-            });
-        } else {
-            this.compass.heading = 'Not Supported';
-        }
+      if ('ondeviceorientationabsolute' in window) {
+        window.addEventListener('deviceorientationabsolute', (event) => {
+          heading = Math.round(event.alpha); // Get the heading in degrees
+          this.compass.heading = heading; // Display direction in degrees
+          $refs.compassArrow.style.transform = `rotate(${360 - heading}deg)`; // Rotate the arrow
+        });
+      } else { heading = 'Not Supported'; }
     },
 
     // 🚶 Pedometer
