@@ -44,6 +44,17 @@ document.addEventListener('alpine:init', () => {
           });
       }
     },
+    async shareApp() {
+        if (navigator.share) {
+          await navigator.share({
+            title: "Beacon",
+            text: "Check this out",
+            url: window.location.href
+          });
+        } else {
+          alert("Sharing is not supported on this browser.");
+        }
+    },
 
     // Filter Guides
     get filteredGuides() {

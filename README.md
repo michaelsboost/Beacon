@@ -1,6 +1,6 @@
 # 📖 Beacon Survival App
 
-![](https://raw.githubusercontent.com/michaelsboost/Beacon/main/imgs/screenshots/screenshot-training.png)
+![](https://raw.githubusercontent.com/michaelsboost/Beacon/main/imgs/screenshots/screenshot-training.jpeg)
 
 ## 🌟 Overview
 The **Beacon Survival App** is an **interactive survival training tool** designed to help users build critical survival skills through **guides, training simulations, emergency checklists, and scenario-based challenges**. It includes **real-time progress tracking, skill meters, local storage integration, and an interactive UI** powered by **Alpine.js**.
